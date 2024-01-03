@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 
 public class GUI {
 	GUI() {
@@ -15,8 +16,8 @@ public class GUI {
 			System.out.println("Look and Feel not set");
 		}
 
-		LoginGUI loginGui = new LoginGUI();
-		MainGUI mainGUI;
+		//LoginGUI loginGui = new LoginGUI();
+		MainGUI mainGUI = new MainGUI();
 
 
 	}
@@ -117,9 +118,9 @@ public class GUI {
 	}
 
 	private static class MainGUI extends JFrame implements ActionListener{
+		public static JPanel conversationPanel;
 		MainGUI(){
-			JPanel chatSelectionPanel = new JPanel();
-			JPanel conversationPanel = new JPanel();
+			conversationPanel = new JPanel();
 
 			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			this.setResizable(false);
@@ -130,43 +131,32 @@ public class GUI {
 
 			int border = 10;
 
-			chatSelectionPanel.setBorder(BorderFactory.createTitledBorder("Wybór konwersacji"));
-			chatSelectionPanel.setBounds(0, 0, 300, 680 - (4 * border));
-			chatSelectionPanel.setBackground(Color.green);
-			chatSelectionPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setBorder(BorderFactory.createTitledBorder("Wybór konwersacji"));
+			scrollPane.setBounds(0, 0, 300, 680 - (4 * border));
+			scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 			conversationPanel.setBorder(BorderFactory.createTitledBorder("Czat"));
 			conversationPanel.setBounds(300,0,500-(border*2),680-(4*border));
-			conversationPanel.setBackground(Color.red);
 
-			//JScrollPane chatScrollPane = new JScrollPane(chatSelectionPanel);
-			//chatScrollPane.setBounds(10,10,100,100);
+			JPanel contentPanel = new JPanel();
+			contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
-			//chatScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-			this.add(chatSelectionPanel);
-			this.add(conversationPanel);
+			scrollPane.setViewportView(contentPanel);
 
 			JPanel panel = new JPanel();
 			panel.setBounds(0,0,10,10);
 			panel.setBackground(Color.CYAN);
-			chatSelectionPanel.add(panel);
-
 
 			// Dodajmy kilka przykładowych elementów do listy konwersacji
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < 20; i++) {
 				conversationListPanelElement element = new conversationListPanelElement("Konwersacja " + (i + 1));
-				chatSelectionPanel.add(element);
+				contentPanel.add(element);
 			}
 
-			// Obsługa przewijania listy konwersacji za pomocą myszy
-            /*chatScrollPane.addMouseWheelListener(new MouseWheelListener() {
-                @Override
-                public void mouseWheelMoved(MouseWheelEvent e) {
-                    JScrollBar verticalScrollBar = chatScrollPane.getVerticalScrollBar();
-                    verticalScrollBar.setValue(verticalScrollBar.getValue() - e.getWheelRotation() * verticalScrollBar.getUnitIncrement());
-                }
-            });*/
+			this.add(scrollPane, BorderLayout.CENTER);
+			this.add(conversationPanel);
+
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -175,35 +165,75 @@ public class GUI {
 
 
 	}
-	private static class conversationListPanelElement extends JPanel{
+	private static class conversationListPanelElement extends JPanel {
 		JLabel chatName;
-		conversationListPanelElement(String name){
+
+		conversationListPanelElement(String name) {
 			AvatarPanel graphicsPanel = new AvatarPanel();
 			chatName = new JLabel(name);
 
-			JLabel chatName = new JLabel();
-			this.setBorder(BorderFactory.createCompoundBorder());
+			this.setBorder(BorderFactory.createTitledBorder(""));
 			this.setLayout(new BorderLayout());
 			this.add(graphicsPanel, BorderLayout.WEST);
-			this.add(chatName, BorderLayout.CENTER);
-			this.setBounds(0,0,10,10);
 			this.setBackground(Color.CYAN);
+
+			// Ustawienie layoutu dla chatName na FlowLayout z wyśrodkowaniem
+			JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+			namePanel.add(chatName);
+			this.add(namePanel, BorderLayout.CENTER);
+
+			setPreferredSize(new Dimension(190, 50));  // Ustawia preferowany rozmiar dla tego elementu
+			setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));  // Ustawia maksymalny rozmiar szerokości
+
+			this.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					// Po kliknięciu wypisz nazwę konwersacji w konsoli
+					System.out.println("Kliknięto konwersację: " + name);
+					MainGUI.conversationPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
+				}
+			});
+		}
+
+		// Metoda ustawiająca tekst dla chatName
+		public void setChatNameText(String text) {
+			chatName.setText(text);
+		}
+
+		// Metoda ustawiająca obrazek dla AvatarPanel
+		public void setAvatarImage(Image image) {
+			((AvatarPanel) getComponent(0)).setObraz(image);
 		}
 	}
 
 	private static class AvatarPanel extends JPanel {
-
 		private Image obraz;
+
 		public AvatarPanel() {
-			// Wczytaj obraz z pliku
-			obraz = new ImageIcon("sciezka/do/twojego/pliku/obrazu.jpg").getImage();
+			// Domyślny obrazek, można go później zmienić używając setObraz(Image image)
+			obraz = new ImageIcon("src/textures/avatar2.png").getImage();
+			setPreferredSize(new Dimension(50, 40));
+			setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));  // Ustawia maksymalny rozmiar szerokości
 		}
+
+		public void setObraz(Image obraz) {
+			this.obraz = obraz;
+			repaint();  // Ponowne rysowanie panelu po zmianie obrazu
+		}
+
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 
-			// Rysuj obraz na panelu
-			g.drawImage(obraz, 50, 50, this);
+			// Rysowanie obrazu w kształcie koła
+			Graphics2D g2d = (Graphics2D) g.create();
+			Ellipse2D.Double circle = new Ellipse2D.Double(0, 0, getWidth(), getHeight());
+			g2d.setClip(circle);
+			g2d.drawImage(obraz, 0, 0, getWidth(), getHeight(), this);
+			g2d.dispose();
+
+			// Rysuj obraz na panelu - kwadrat
+			//g.drawImage(obraz, 0, 0, getWidth(), getHeight(), this);
 		}
 	}
 }
