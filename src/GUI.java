@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.MouseInputAdapter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -121,8 +122,8 @@ public class GUI {
 		}
 	}
 
-	private static class MainGUI extends JFrame implements ActionListener{
-		public static JScrollPane messangesPanel;
+	public static class MainGUI extends JFrame implements ActionListener{
+		public static JScrollPane messagesPanel;
 		public static int displayedConversationId = 1;
 		private static JPanel administratorButtonPanel;
 		public static JButton adminButtonMenu;
@@ -130,8 +131,14 @@ public class GUI {
 		public static JButton moderatorButtonMenu;
 		private static JButton sendButton;
 		private static JTextArea newMessageArea;
+
+		public static JScrollPane newMessagePane;
+		public static Icon reactIcon;
+		public static int respondingId = -1;
 		MainGUI(){
-			messangesPanel = new JScrollPane();
+
+			reactIcon = new ImageIcon("src/textures/react.png");
+			messagesPanel = new JScrollPane();
 
 			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			this.setResizable(false);
@@ -145,21 +152,27 @@ public class GUI {
 
 			int border = 10;
 
-			messangesPanel.setBorder(BorderFactory.createTitledBorder("Czat"));
-			messangesPanel.setBounds(300,0,500-(border*2),680-(4*border)-100);
-			messangesPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+			messagesPanel.setBorder(BorderFactory.createTitledBorder("Czat"));
+			messagesPanel.setBounds(300,0,500-(border*2),680-(4*border)-100);
+			messagesPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 			JPanel mContentPanel = new JPanel();
 			mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
-			messangesPanel.setViewportView(mContentPanel);
+			messagesPanel.setViewportView(mContentPanel);
 
 			//TODO add messages panels
+			for (int i = 0; i<10; i++){
+				MessagesListElement melement = new MessagesListElement(new DatabaseComm.Message(0,
+						"<html>by Michał Bernacki-Janson, <br>Kamil Godek and Jakub Klawon<br>asdasdasds</html>",2, 2
+						));
+				mContentPanel.add(melement);
+			}
 
 
 			newMessageArea = new JTextArea();
 			newMessageArea.setLineWrap(true);
 			newMessageArea.setFont(new Font("Arial", Font.PLAIN, 14));
-			JScrollPane newMessagePane = new JScrollPane(newMessageArea);
+			newMessagePane = new JScrollPane(newMessageArea);
 			newMessagePane.setBorder(BorderFactory.createTitledBorder("Napisz wiadomość"));
 			newMessagePane.setBounds(300, 580 - 4*border, 500-(border*2)-100, 100);
 			newMessagePane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -183,7 +196,7 @@ public class GUI {
 			administratorButtonPanel = new JPanel();
 			administratorButtonPanel.setBounds(0, 640 - (4 * border), 150, 40);
 			//administratorButtonPanel.setBackground(Color.RED);
-			this.add(administratorButtonPanel);
+			//this.add(administratorButtonPanel);
 
 			adminButtonMenu = new JButton("Panel Administratora");
 			adminButtonMenu.setPreferredSize(new Dimension(150, 30));
@@ -196,7 +209,7 @@ public class GUI {
 			moderatorButtonPanel = new JPanel();
 			moderatorButtonPanel.setBounds(150, 640 - (4 * border), 150, 40);
 			//moderatorButtonPanel.setBackground(Color.CYAN);
-			this.add(moderatorButtonPanel);
+			//this.add(moderatorButtonPanel);
 
 			moderatorButtonMenu = new JButton("Panel Moderatora");
 			moderatorButtonMenu.setPreferredSize(new Dimension(150, 30));
@@ -214,7 +227,7 @@ public class GUI {
 			}
 
 			this.add(scrollPane, BorderLayout.CENTER);
-			this.add(messangesPanel);
+			this.add(messagesPanel);
 			this.add(newMessagePane);
 			this.add(sendButton);
 
@@ -222,7 +235,7 @@ public class GUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == sendButton){
-				Main.databaseComm.sendMessage(displayedConversationId, newMessageArea.getText());
+				Main.databaseComm.sendMessage(displayedConversationId, newMessageArea.getText(), respondingId);
 			}
 			if(e.getSource() == adminButtonMenu){
 				//Wyświetlenie Panelu Admin
@@ -237,6 +250,65 @@ public class GUI {
 		}
 
 
+	}
+
+	private static class MessagesListElement extends JPanel{
+
+		boolean isResponding = false;
+		MessagesListElement(DatabaseComm.Message messageData){
+
+			if(messageData.senderId == MainGUI.displayedConversationId){
+				this.setLayout(new FlowLayout(FlowLayout.RIGHT));
+			}else{
+				this.setLayout(new FlowLayout(FlowLayout.LEFT));
+			}
+
+			JPanel messagePanel = new JPanel();
+			messagePanel.setLayout(new BorderLayout());
+
+			DatabaseComm.User user = Main.databaseComm.getUser(messageData.senderId);
+			JLabel iconLabel = new JLabel(user.icon);
+			this.add(iconLabel);
+
+			JLabel senderName = new JLabel();
+			senderName.setText(user.username);
+
+			JLabel content = new JLabel();
+			content.setBackground(Color.cyan);
+			content.setOpaque(true);
+			content.setText(messageData.content);
+			content.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if(!isResponding){
+						content.setBackground(Color.pink);
+						MainGUI.newMessagePane.setBorder(BorderFactory.createTitledBorder("Odpowiedź na wiadomość użytkownika " + user.username));
+						isResponding = true;
+						MainGUI.respondingId = messageData.id;
+						//TODO wszystkie inne powinny się graficznie odznaczyć
+					}else{
+						content.setBackground(Color.cyan);
+						MainGUI.newMessagePane.setBorder(BorderFactory.createTitledBorder("Napisz wiadomość"));
+						isResponding = false;
+						MainGUI.respondingId = -1;
+					}
+				}
+			});
+
+			messagePanel.add(senderName, BorderLayout.NORTH);
+			messagePanel.add(content, BorderLayout.SOUTH);
+			this.add(messagePanel);
+
+			JLabel react = new JLabel();
+			react.setIcon(MainGUI.reactIcon);
+			react.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					System.out.println("reakcja"); //TODO menu reakcji
+				}
+			});
+			this.add(react);
+		}
 	}
 	private static class conversationListPanelElement extends JPanel {
 		JLabel chatName;
@@ -264,8 +336,10 @@ public class GUI {
 				public void mouseClicked(MouseEvent e) {
 					// Po kliknięciu wypisz nazwę konwersacji w konsoli
 					System.out.println("Kliknięto konwersację: " + name);
-					MainGUI.messangesPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
+					MainGUI.messagesPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
 					MainGUI.displayedConversationId = tempId; //TODO zapisywane powinno być faktyczne id konwersacji
+					//MainGUI.messangesPanel.revalidate(); //TODO odświeżanie zawartości messagesPanel
+					//MainGUI.messangesPanel.repaint();
 				}
 			});
 		}
@@ -662,12 +736,6 @@ public class GUI {
 			this.setVisible(true);
 
 			int border = 10;
-
-		}
-	}
-
-	private static class MessagesListElement extends JPanel{
-		MessagesListElement(DatabaseComm.Message message){
 
 		}
 	}
