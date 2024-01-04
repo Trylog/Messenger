@@ -7,6 +7,5 @@ public class Main {
 		databaseComm = new DatabaseComm();
 		gui = new GUI();
 
-
 	}
 }
