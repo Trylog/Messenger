@@ -160,7 +160,6 @@ public class GUI {
 			mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
 			messagesPanel.setViewportView(mContentPanel);
 
-			//TODO add messages panels
 			for (int i = 0; i<10; i++){
 				MessagesListElement melement = new MessagesListElement(new DatabaseComm.Message(0,
 						"<html>by Michał Bernacki-Janson, <br>Kamil Godek and Jakub Klawon<br>asdasdasds</html>",2, 2
@@ -258,9 +257,9 @@ public class GUI {
 		MessagesListElement(DatabaseComm.Message messageData){
 
 			if(messageData.senderId == MainGUI.displayedConversationId){
-				this.setLayout(new FlowLayout(FlowLayout.RIGHT));
+				this.setLayout(new FlowLayout(FlowLayout.RIGHT, 2, 1));
 			}else{
-				this.setLayout(new FlowLayout(FlowLayout.LEFT));
+				this.setLayout(new FlowLayout(FlowLayout.LEFT, 2, 1));
 			}
 
 			JPanel messagePanel = new JPanel();
@@ -296,7 +295,17 @@ public class GUI {
 			});
 
 			messagePanel.add(senderName, BorderLayout.NORTH);
-			messagePanel.add(content, BorderLayout.SOUTH);
+			messagePanel.add(content, BorderLayout.CENTER);
+
+			JPanel emoji = new JPanel();
+			//TODO fabryka, emoji przechowywane w mapie
+			emoji.setLayout(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+			JLabel la1 = new JLabel("⌚ " + 2);
+			emoji.add(la1);
+			JLabel la2 = new JLabel("❔ " + 1);
+			emoji.add(la2);
+
+			messagePanel.add(emoji, BorderLayout.SOUTH);
 			this.add(messagePanel);
 
 			JLabel react = new JLabel();
@@ -305,9 +314,18 @@ public class GUI {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					System.out.println("reakcja"); //TODO menu reakcji
+					EmojiChooser emojiChooser = new EmojiChooser();
 				}
 			});
 			this.add(react);
+		}
+	}
+
+	private static class EmojiChooser extends JFrame{
+		EmojiChooser(){
+			this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			this.setSize(200,300);
+			this.setVisible(true);
 		}
 	}
 	private static class conversationListPanelElement extends JPanel {
