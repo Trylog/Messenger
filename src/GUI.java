@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 
 public class GUI {
+	public MainGUI mainGUI;
 	GUI() {
 		try {
 
@@ -16,8 +17,8 @@ public class GUI {
 			System.out.println("Look and Feel not set");
 		}
 
-		//LoginGUI loginGui = new LoginGUI();
-		MainGUI mainGUI = new MainGUI();
+		LoginGUI loginGui = new LoginGUI();
+
 
 
 	}
@@ -103,6 +104,7 @@ public class GUI {
 				String password = t2.getText();
 				if(Main.databaseComm.login(login, password)){
 					dispose();
+					Main.gui.mainGUI = new MainGUI();
 				}else{
 					//wrong login credentials
 					JFrame f = new JFrame();
@@ -118,49 +120,78 @@ public class GUI {
 	}
 
 	private static class MainGUI extends JFrame implements ActionListener{
-		public static JPanel conversationPanel;
+		public static JScrollPane conversationPanel;
+		public static int displayedConversationId = 1;
+
+		private static JButton sendButton;
+		private static JTextArea newMessageArea;
 		MainGUI(){
-			conversationPanel = new JPanel();
+			conversationPanel = new JScrollPane();
 
 			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			this.setResizable(false);
 			this.setLocationRelativeTo(null);
 			this.setLayout(null);
 			this.setSize(800, 680);
+			this.setTitle("Messenger");
+			Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
+			this.setIconImage(icon);
 			this.setVisible(true);
 
 			int border = 10;
+
+			conversationPanel.setBorder(BorderFactory.createTitledBorder("Czat"));
+			conversationPanel.setBounds(300,0,500-(border*2),680-(4*border)-100);
+			conversationPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+			JPanel mContentPanel = new JPanel();
+			mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
+			conversationPanel.setViewportView(mContentPanel);
+
+			//TODO add messages panels
+
+
+			newMessageArea = new JTextArea();
+			newMessageArea.setLineWrap(true);
+			newMessageArea.setFont(new Font("Arial", Font.PLAIN, 14));
+			JScrollPane newMessagePane = new JScrollPane(newMessageArea);
+			newMessagePane.setBorder(BorderFactory.createTitledBorder("Napisz wiadomość"));
+			newMessagePane.setBounds(300, 580 - 4*border, 500-(border*2)-100, 100);
+			newMessagePane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+			Icon sendIcon = new ImageIcon("src/textures/send.png");
+			sendButton = new JButton(sendIcon);
+			sendButton.setBounds(700 - border*2 +10,580 - 4*border+10,80,80);
+			sendButton.addActionListener(this);
+
 
 			JScrollPane scrollPane = new JScrollPane();
 			scrollPane.setBorder(BorderFactory.createTitledBorder("Wybór konwersacji"));
 			scrollPane.setBounds(0, 0, 300, 680 - (4 * border));
 			scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-			conversationPanel.setBorder(BorderFactory.createTitledBorder("Czat"));
-			conversationPanel.setBounds(300,0,500-(border*2),680-(4*border));
+			JPanel cContentPanel = new JPanel();
+			cContentPanel.setLayout(new BoxLayout(cContentPanel, BoxLayout.Y_AXIS));
 
-			JPanel contentPanel = new JPanel();
-			contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-
-			scrollPane.setViewportView(contentPanel);
-
-			JPanel panel = new JPanel();
-			panel.setBounds(0,0,10,10);
-			panel.setBackground(Color.CYAN);
+			scrollPane.setViewportView(cContentPanel);
 
 			// Dodajmy kilka przykładowych elementów do listy konwersacji
 			for (int i = 0; i < 20; i++) {
-				conversationListPanelElement element = new conversationListPanelElement("Konwersacja " + (i + 1));
-				contentPanel.add(element);
+				conversationListPanelElement element = new conversationListPanelElement(i + 1);
+				cContentPanel.add(element);
 			}
 
 			this.add(scrollPane, BorderLayout.CENTER);
 			this.add(conversationPanel);
+			this.add(newMessagePane);
+			this.add(sendButton);
 
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
+			if(e.getSource() == sendButton){
+				Main.databaseComm.sendMessage(displayedConversationId, newMessageArea.getText());
+			}
 		}
 
 
@@ -168,7 +199,8 @@ public class GUI {
 	private static class conversationListPanelElement extends JPanel {
 		JLabel chatName;
 
-		conversationListPanelElement(String name) {
+		conversationListPanelElement(int id) {
+			String name = "Konwersacja " + id;
 			AvatarPanel graphicsPanel = new AvatarPanel();
 			chatName = new JLabel(name);
 
@@ -191,6 +223,7 @@ public class GUI {
 					// Po kliknięciu wypisz nazwę konwersacji w konsoli
 					System.out.println("Kliknięto konwersację: " + name);
 					MainGUI.conversationPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
+					MainGUI.displayedConversationId = id;
 				}
 			});
 		}
