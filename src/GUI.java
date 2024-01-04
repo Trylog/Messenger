@@ -185,7 +185,7 @@ public class GUI {
 
 			JScrollPane scrollPane = new JScrollPane();
 			scrollPane.setBorder(BorderFactory.createTitledBorder("Wybór konwersacji"));
-			scrollPane.setBounds(0, 0, 300, 680 - (4 * border));
+			scrollPane.setBounds(0, 0, 300, 640 - (4 * border));
 			scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 			JPanel cContentPanel = new JPanel();
@@ -196,7 +196,7 @@ public class GUI {
 			administratorButtonPanel = new JPanel();
 			administratorButtonPanel.setBounds(0, 640 - (4 * border), 150, 40);
 			//administratorButtonPanel.setBackground(Color.RED);
-			//this.add(administratorButtonPanel);
+			this.add(administratorButtonPanel);
 
 			adminButtonMenu = new JButton("Panel Administratora");
 			adminButtonMenu.setPreferredSize(new Dimension(150, 30));
@@ -209,7 +209,7 @@ public class GUI {
 			moderatorButtonPanel = new JPanel();
 			moderatorButtonPanel.setBounds(150, 640 - (4 * border), 150, 40);
 			//moderatorButtonPanel.setBackground(Color.CYAN);
-			//this.add(moderatorButtonPanel);
+			this.add(moderatorButtonPanel);
 
 			moderatorButtonMenu = new JButton("Panel Moderatora");
 			moderatorButtonMenu.setPreferredSize(new Dimension(150, 30));
