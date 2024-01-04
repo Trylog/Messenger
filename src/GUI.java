@@ -122,7 +122,7 @@ public class GUI {
 	}
 
 	private static class MainGUI extends JFrame implements ActionListener{
-		public static JScrollPane conversationPanel;
+		public static JScrollPane messangesPanel;
 		public static int displayedConversationId = 1;
 		private static JPanel administratorButtonPanel;
 		public static JButton adminButtonMenu;
@@ -131,7 +131,7 @@ public class GUI {
 		private static JButton sendButton;
 		private static JTextArea newMessageArea;
 		MainGUI(){
-			conversationPanel = new JScrollPane();
+			messangesPanel = new JScrollPane();
 
 			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			this.setResizable(false);
@@ -145,13 +145,13 @@ public class GUI {
 
 			int border = 10;
 
-			conversationPanel.setBorder(BorderFactory.createTitledBorder("Czat"));
-			conversationPanel.setBounds(300,0,500-(border*2),680-(4*border)-100);
-			conversationPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+			messangesPanel.setBorder(BorderFactory.createTitledBorder("Czat"));
+			messangesPanel.setBounds(300,0,500-(border*2),680-(4*border)-100);
+			messangesPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 			JPanel mContentPanel = new JPanel();
 			mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
-			conversationPanel.setViewportView(mContentPanel);
+			messangesPanel.setViewportView(mContentPanel);
 
 			//TODO add messages panels
 
@@ -172,7 +172,7 @@ public class GUI {
 
 			JScrollPane scrollPane = new JScrollPane();
 			scrollPane.setBorder(BorderFactory.createTitledBorder("Wybór konwersacji"));
-			scrollPane.setBounds(0, 0, 300, 640 - (4 * border));
+			scrollPane.setBounds(0, 0, 300, 680 - (4 * border));
 			scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 			JPanel cContentPanel = new JPanel();
@@ -214,7 +214,7 @@ public class GUI {
 			}
 
 			this.add(scrollPane, BorderLayout.CENTER);
-			this.add(conversationPanel);
+			this.add(messangesPanel);
 			this.add(newMessagePane);
 			this.add(sendButton);
 
@@ -235,12 +235,14 @@ public class GUI {
 				ModeratorPanelFrame moderatorPanelFrame = new ModeratorPanelFrame();
 			}
 		}
+
+
 	}
 	private static class conversationListPanelElement extends JPanel {
 		JLabel chatName;
 
-		conversationListPanelElement(int id) {
-			String name = "Konwersacja " + id;
+		conversationListPanelElement(int tempId) { //TODO wejściem powinien być obiekt zawierający wszystkie dane o konwersacji
+			String name = "Konwersacja " + tempId;
 			AvatarPanel graphicsPanel = new AvatarPanel();
 			chatName = new JLabel(name);
 
@@ -262,8 +264,8 @@ public class GUI {
 				public void mouseClicked(MouseEvent e) {
 					// Po kliknięciu wypisz nazwę konwersacji w konsoli
 					System.out.println("Kliknięto konwersację: " + name);
-					MainGUI.conversationPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
-					MainGUI.displayedConversationId = id;
+					MainGUI.messangesPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
+					MainGUI.displayedConversationId = tempId; //TODO zapisywane powinno być faktyczne id konwersacji
 				}
 			});
 		}
@@ -660,6 +662,12 @@ public class GUI {
 			this.setVisible(true);
 
 			int border = 10;
+
+		}
+	}
+
+	private static class MessagesListElement extends JPanel{
+		MessagesListElement(DatabaseComm.Message message){
 
 		}
 	}
