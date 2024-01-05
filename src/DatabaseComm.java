@@ -45,4 +45,9 @@ public class DatabaseComm {
 		return new User(id, "test username", new ImageIcon("src/textures/avatar.png"));
 	}
 
+	void sendReaction(int msId, String reactionId){
+
+	}
+
+
 }
