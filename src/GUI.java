@@ -423,6 +423,7 @@ public class GUI {
 		public void actionPerformed(ActionEvent e) {
 			System.out.println(((JButton)e.getSource()).getText());
 			Main.databaseComm.sendReaction(msId, ((JButton) e.getSource()).getText());
+			dispose();
 		}
 	}
 	private static class conversationListPanelElement extends JPanel {
