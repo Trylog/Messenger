@@ -1,3 +1,4 @@
+//Project by Michał Bernacki-Janson, Kamil Gondek and Jakub Klawon
 public class Main {
 
 	public final static String version = "v0.1";
