@@ -15,7 +15,7 @@ import static Main.DatabaseComm.*;
 
 public class MainGUI extends JFrame implements ActionListener {
 	public static JScrollPane messagesPanel;
-	public static int displayedConversationId = 1;
+	public static int displayedConversationId = -1;
 	private static JPanel administratorButtonPanel;
 	public static JButton adminButtonMenu;
 	private static JPanel moderatorButtonPanel;
@@ -31,6 +31,8 @@ public class MainGUI extends JFrame implements ActionListener {
 	public static int respondingId = -1;
 	private static String curentConversationName;
 	public static Image icon;
+
+	public static JPanel mContentPanel;
 
 	MainGUI(){
 
@@ -52,17 +54,16 @@ public class MainGUI extends JFrame implements ActionListener {
 		messagesPanel.setBounds(300,0,500-(border*2),680-(4*border)-100);
 		messagesPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-		JPanel mContentPanel = new JPanel();
+		mContentPanel = new JPanel();
 		mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
 		messagesPanel.setViewportView(mContentPanel);
 
-		for (int i = 0; i<10; i++){
-			MessagesListElement melement = new MessagesListElement(new DatabaseComm.Message(0,
-					"<html>by Michał Bernacki-Janson, <br>Kamil Godek and Jakub Klawon<br>asdasdasds</html>",2, 2
-			));
-			mContentPanel.add(melement);
-		}
+		var messages = Main.databaseComm.getMessages();
 
+		for(var message : messages){
+			MessagesListElement element = new MessagesListElement(message);
+			mContentPanel.add(element);
+		}
 
 		newMessageArea = new JTextArea();
 		newMessageArea.setLineWrap(true);
@@ -185,10 +186,13 @@ public class MainGUI extends JFrame implements ActionListener {
 	}
 	private static class MessagesListElement extends JPanel{
 
+		private static MessagesListElement currentRedLabel;
 		boolean isResponding = false;
+		JLabel content;
 		MessagesListElement(DatabaseComm.Message messageData){
 
-			if(messageData.senderId == MainGUI.displayedConversationId){
+
+			if(messageData.senderId == Main.databaseComm.userId){
 				this.setLayout(new FlowLayout(FlowLayout.RIGHT, 4, 1));
 			}else{
 				this.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 1));
@@ -204,19 +208,26 @@ public class MainGUI extends JFrame implements ActionListener {
 			JLabel senderName = new JLabel();
 			senderName.setText(user.username);
 
-			JLabel content = new JLabel();
+			content = new JLabel();
 			content.setBackground(Color.cyan);
 			content.setOpaque(true);
 			content.setText(messageData.content);
+
+			var temp = this;
 			content.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					if(!isResponding){
-						content.setBackground(Color.pink);
+						//content.setBackground(Color.pink);
 						MainGUI.newMessagePane.setBorder(BorderFactory.createTitledBorder("Odpowiedź na wiadomość użytkownika " + user.username));
 						isResponding = true;
 						MainGUI.respondingId = messageData.id;
-						//TODO wszystkie inne powinny się graficznie odznaczyć
+						if (currentRedLabel != null) {
+							currentRedLabel.content.setBackground(Color.cyan);
+							currentRedLabel.isResponding = false;
+						}
+						content.setBackground(Color.pink);
+						currentRedLabel = temp;
 					}else{
 						content.setBackground(Color.cyan);
 						MainGUI.newMessagePane.setBorder(BorderFactory.createTitledBorder("Napisz wiadomość"));
@@ -229,13 +240,16 @@ public class MainGUI extends JFrame implements ActionListener {
 			messagePanel.add(senderName, BorderLayout.NORTH);
 			messagePanel.add(content, BorderLayout.CENTER);
 
+			///REAKCJE
 			JPanel emoji = new JPanel();
-			//TODO fabryka, emoji przechowywane w mapie
 			emoji.setLayout(new FlowLayout(FlowLayout.RIGHT, 2, 0));
-			JLabel la1 = new JLabel("⌚ " + 2);
-			emoji.add(la1);
-			JLabel la2 = new JLabel("❔ " + 1);
-			emoji.add(la2);
+
+			var reactions = Main.databaseComm.getReactions(messageData.id);
+
+			for (var reaction : reactions.entrySet()){
+				JLabel r = new JLabel(reaction.getKey() + " " + reaction.getValue());
+				emoji.add(r);
+			}
 
 			messagePanel.add(emoji, BorderLayout.SOUTH);
 			this.add(messagePanel);

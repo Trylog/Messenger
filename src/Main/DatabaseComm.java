@@ -3,9 +3,11 @@ package Main;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DatabaseComm {
-	public static int userId;
+	public int userId; //login userId
 
 	public static boolean isAdmin;
 
@@ -58,7 +60,7 @@ public class DatabaseComm {
 		System.out.println("Konwersacja: " + conversationId + "; Nowa wiadomość: " + content);
 	}
 
-	int getCurrentUserId(){
+	private int getCurrentUserId(){
 		return 1;
 	}
 
@@ -66,9 +68,30 @@ public class DatabaseComm {
 		return new User(id, "test username", new ImageIcon("src/textures/avatar.png"));
 	}
 
+	public HashMap<String, Integer> getReactions(int msId){
+
+		HashMap<String, Integer> reactions = new HashMap<>();
+		//dane do testów
+		reactions.put("\uD83D\uDC4D", 2);
+		reactions.put("❤", 1);
+		reactions.put("\uD83D\uDE22", 5);
+		return reactions;
+	}
+
 	public void sendReaction(int msId, String reactionId){
 
 
+	}
+
+	public ArrayList<Message> getMessages(){
+		ArrayList<Message> messages = new ArrayList<>();
+
+		Message message = new DatabaseComm.Message(0, "<html>by Michał Bernacki-Janson, <br>Kamil Godek and Jakub Klawon<br>asdasdasds</html>",2, 2);
+
+		messages.add(message);
+		messages.add(message);
+
+		return messages;
 	}
 
 	//Nie podaje samego siebie
