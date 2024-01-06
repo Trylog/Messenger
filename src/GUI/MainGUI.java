@@ -174,11 +174,13 @@ public class MainGUI extends JFrame implements ActionListener {
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("PStwórz czat");
 			CreateChatGUI createChatGUI = new CreateChatGUI();
+			//TODO Odświeżenie Listy Konwersacji
 		}
 		if(e.getSource() == joinChatButtonButtonMenu){
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Dołącz do konwersacji");
 			JoinChatGUI joinChatGUI = new JoinChatGUI();
+			//TODO Odświeżenie Listy Konwersacji
 		}
 	}
 	private static class MessagesListElement extends JPanel{

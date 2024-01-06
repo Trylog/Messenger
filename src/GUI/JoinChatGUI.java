@@ -1,13 +1,20 @@
 package GUI;
 
+import Main.DatabaseComm;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
- class JoinChatGUI extends JFrame implements ActionListener {
+import Main.*;
+
+import static Main.DatabaseComm.*;
+
+class JoinChatGUI extends JFrame implements ActionListener {
 	private JScrollPane chatScrollPane;
 	private JPanel chatListPanel;
 	private JTextField chatSearchField;
@@ -42,9 +49,10 @@ import java.awt.event.ActionListener;
 		// Grupa dla przycisków czatów
 		chatButtonGroup = new ButtonGroup();
 
-		// Przykładowe dodanie kilku czatów
-		for (int i = 0; i < 20; i++) {
-			JToggleButton chatButton = new JToggleButton("Czat " + i);
+		// Dodajmy elementów do listy czatów
+		ArrayList <Conversation> chats  = getUsersChat();
+		for (int i = 0; i < chats.size(); i++) {
+			JToggleButton chatButton = new JToggleButton(chats.get(i).name);
 			chatButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
 			Dimension buttonSize = new Dimension(390, 30);
 			chatButton.setPreferredSize(buttonSize);
@@ -107,19 +115,7 @@ import java.awt.event.ActionListener;
 		chatListPanel.revalidate();
 		chatListPanel.repaint();
 	}
-	public void addChatToList(String chatName) {
-		JToggleButton chatButton = new JToggleButton(chatName);
-		chatButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-		Dimension buttonSize = new Dimension(390, 30);
-		chatButton.setPreferredSize(buttonSize);
-		chatButton.setMaximumSize(buttonSize);
-		chatButton.addActionListener(new JoinChatGUI.ChatButtonListener());
-		chatListPanel.add(chatButton);
-		chatButtonGroup.add(chatButton);
 
-		chatListPanel.revalidate();
-		chatListPanel.repaint();
-	}
 	private JPanel createInfoTextArea(int x, int y, String title, int width, int height, JTextArea infoTextArea ) {
 		JPanel infoTextPanel = new JPanel();
 
@@ -145,6 +141,10 @@ import java.awt.event.ActionListener;
 				JOptionPane.showMessageDialog(null, "Nie wybrano chatu", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
 				System.out.println("Dołączono do czatu - " + chatInfoTextArea.getText());
+				if(!(addUserToChat(chatInfoTextArea.getText()))){
+					JOptionPane.showMessageDialog(null, "Nie Udało się dodać użytkownika", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
+				dispose();
 			}
 		}
 	}

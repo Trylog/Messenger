@@ -71,6 +71,7 @@ public class DatabaseComm {
 
 	}
 
+	//Nie podaje samego siebie
 	public static ArrayList <User> getPortalUsersNames(){
 		ArrayList <User> usersNames = new ArrayList<>();
 
@@ -81,6 +82,7 @@ public class DatabaseComm {
 		return  usersNames;
 	}
 
+	//Nie podaje samego siebie
 	//UżytkownicyDanegoCzatu
 	public static ArrayList <User> getChatUsersNames(String chatName){
 		ArrayList <User> usersNames = new ArrayList<>();
@@ -92,6 +94,7 @@ public class DatabaseComm {
 		return  usersNames;
 	}
 
+	//Nie podaje samego siebie
 	//ModeratorzyDanegoCzatu
 	public static ArrayList <User> getChatModeratorsNames(String chatName){
 		ArrayList <User> usersNames = new ArrayList<>();
@@ -105,13 +108,13 @@ public class DatabaseComm {
 
 	//Czy Dany Użytkownik Jest Adminem
 	public static boolean getAdminIs(){
-		boolean isAdmin = false;
+		boolean isAdmin = true;
 		return isAdmin;
 	}
 
 	//Czy dany użytkownik Jest Moderatorem Tego Czatu
 	public static boolean getModeratorChatIs(String chatName){
-		boolean isModerator = false;
+		boolean isModerator = true;
 		return isModerator;
 	}
 
@@ -136,6 +139,70 @@ public class DatabaseComm {
 
 		return  allChats;
 	}
+
+	//Dodaje użytkownika do czatu
+	public static boolean addUserToChat(String  chatName){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	public static boolean createChat(String  chatName, Image avatar){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+	public static boolean addUserListToChat(String  chatName,ArrayList<String> usersNames){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	//Dodatkowo dodaje rownież użytkownika Do moderatorów
+	public static boolean addModeratorListToChat(String  chatName, ArrayList<String> usersNames){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	//Musi sprawdzić czy użytkownik Nie jestModeratorem
+	public static boolean removeUserFromChat(String  chatName,String userNames){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	//Obniża swoje uprawnienia
+	public static boolean downModeratorPermision(String  chatName){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	public static boolean removeModeratorFromChat(String  chatName, String userNames){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	public static boolean removeConversation(String  chatName){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	public static boolean setConversationNewData(String  chatName, String newChatName,Image avatar){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	public static boolean removeUserFromPortal(String userNames){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
 
 
 }

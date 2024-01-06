@@ -7,9 +7,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
- class CreateChatGUI extends JFrame implements ActionListener {
+import static Main.DatabaseComm.*;
+
+class CreateChatGUI extends JFrame implements ActionListener {
 	private JPanel chatNameTextPanel;
 	private JTextField chatNameTextField;
 	private JPanel avatarPanel;
@@ -43,6 +48,7 @@ import java.util.Enumeration;
 	private ButtonGroup chatModeratorButtonGroup;
 	private JPanel chatModeratorInfoTextPanle;
 	private JTextArea chatModeratorInfoTextArea;
+	private Image scaledImage;
 
 	CreateChatGUI() {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -322,26 +328,33 @@ import java.util.Enumeration;
 		chatModeratorListPanel.revalidate();
 		chatModeratorListPanel.repaint();
 	}
-	private void addUserToChat(){
-		String userName = portalUserInfoTextArea.getText();
-		if(userName.equals("")){
-			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
-		}else {
-			JToggleButton chatUserButton = new JToggleButton();
-			chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(270, 30);
-			chatUserButton.setPreferredSize(buttonSize);
-			chatUserButton.setMaximumSize(buttonSize);
-			chatUserButton.addActionListener(new CreateChatGUI.ChatUserButtonListener());
-			chatUserListPanel.add(chatUserButton);
-			chatUserButtonGroup.add(chatUserButton);
+	 private Set<String> addedUsers = new HashSet<>();
+	 private void addUserToChat() {
+		 String userName = portalUserInfoTextArea.getText();
 
-			chatUserListPanel.revalidate();
-			chatUserListPanel.repaint();
-		}
-	}
+		 if (userName.equals("")) {
+			 JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+		 } else if (addedUsers.contains(userName)) {
+			 JOptionPane.showMessageDialog(null, "Ten użytkownik został już dodany do czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
+		 } else {
+			 JToggleButton chatUserButton = new JToggleButton(userName);
+			 chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+			 Dimension buttonSize = new Dimension(270, 30);
+			 chatUserButton.setPreferredSize(buttonSize);
+			 chatUserButton.setMaximumSize(buttonSize);
+			 chatUserButton.addActionListener(new CreateChatGUI.ChatUserButtonListener());
+			 chatUserListPanel.add(chatUserButton);
+			 chatUserButtonGroup.add(chatUserButton);
+
+			 // Dodanie użytkownika do zbioru
+			 addedUsers.add(userName);
+
+			 chatUserListPanel.revalidate();
+			 chatUserListPanel.repaint();
+		 }
+	 }
 	private void removeUserFromChat() {
-		String userNameToRemove = portalUserInfoTextArea.getText();
+		String userNameToRemove = chatUserInfoTextArea.getText();
 
 		if (userNameToRemove.equals("")) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -353,6 +366,9 @@ import java.util.Enumeration;
 				// Usunięcie przycisku z panelu i grupy przycisków
 				chatUserListPanel.remove(buttonToRemove);
 				chatUserButtonGroup.remove(buttonToRemove);
+				addedUsers.remove(userNameToRemove);
+
+				chatUserInfoTextArea.setText("");
 
 				// Odświeżenie widoku
 				chatUserListPanel.revalidate();
@@ -360,6 +376,7 @@ import java.util.Enumeration;
 			} else {
 				JOptionPane.showMessageDialog(null, "Nie znaleziono użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}
+			downModeratorPermissionToUser(userNameToRemove,true);
 		}
 	}
 	// Metoda pomocnicza do znalezienia przycisku odpowiadającego użytkownikowi
@@ -372,13 +389,18 @@ import java.util.Enumeration;
 		}
 		return null;
 	}
-	private void upUserPermissionToModerator(){
+	private Set<String> addedModerators = new HashSet<>();
+
+	private void upUserPermissionToModerator() {
 		String userName = chatUserInfoTextArea.getText();
-		if(userName.equals("")){
+
+		if (userName.equals("")) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
-		}else {
+		} else if (addedModerators.contains(userName)) {
+			JOptionPane.showMessageDialog(null, "Ten użytkownik został już dodany jako moderator.", "Błąd", JOptionPane.ERROR_MESSAGE);
+		} else {
 			JToggleButton chatModeratorButton = new JToggleButton(userName);
-			chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
+			chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 			Dimension buttonSize = new Dimension(270, 30);
 			chatModeratorButton.setPreferredSize(buttonSize);
 			chatModeratorButton.setMaximumSize(buttonSize);
@@ -386,13 +408,14 @@ import java.util.Enumeration;
 			chatModeratorListPanel.add(chatModeratorButton);
 			chatModeratorButtonGroup.add(chatModeratorButton);
 
+			// Dodanie moderatora do zbioru
+			addedModerators.add(userName);
+
 			chatModeratorListPanel.revalidate();
 			chatModeratorListPanel.repaint();
 		}
 	}
-	private void downModeratorPermissionToUser(){
-		String userNameToRemove = chatUserInfoTextArea.getText();
-
+	private void downModeratorPermissionToUser(String userNameToRemove, boolean extraRemove){
 		if (userNameToRemove.equals("")) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		} else {
@@ -403,12 +426,17 @@ import java.util.Enumeration;
 				// Usunięcie przycisku z panelu i grupy przycisków
 				chatModeratorListPanel.remove(buttonToRemove);
 				chatModeratorButtonGroup.remove(buttonToRemove);
+				addedModerators.remove(userNameToRemove);
+
+				chatModeratorInfoTextArea.setText("");
 
 				// Odświeżenie widoku
 				chatModeratorListPanel.revalidate();
 				chatModeratorListPanel.repaint();
 			} else {
-				JOptionPane.showMessageDialog(null, "Nie znaleziono użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				if(!extraRemove){
+					JOptionPane.showMessageDialog(null, "Nie znaleziono użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 	}
@@ -432,7 +460,7 @@ import java.util.Enumeration;
 				ImageIcon originalIcon = new ImageIcon(selectedFile.getAbsolutePath());
 
 				// Przeskalowanie obrazu
-				Image scaledImage = originalIcon.getImage().getScaledInstance(avatarPanel.getWidth() - 20, avatarPanel.getHeight() - 30, Image.SCALE_SMOOTH);
+				scaledImage = originalIcon.getImage().getScaledInstance(avatarPanel.getWidth() - 20, avatarPanel.getHeight() - 30, Image.SCALE_SMOOTH);
 				ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
 				// Ustawienie ikony na JLabel wewnątrz avatarPanel
@@ -475,7 +503,14 @@ import java.util.Enumeration;
 			upUserPermissionToModerator();
 		}
 		if (e.getSource() == downModeratorPermissionToUser) {
-			downModeratorPermissionToUser();
+			downModeratorPermissionToUser(chatModeratorInfoTextArea.getText(),false);
+		}
+		if (e.getSource() == createChatButton) {
+			createChat(chatNameTextField.getText(),scaledImage);
+			ArrayList<String> addedUsersList = new ArrayList<>(addedUsers);
+			addUserListToChat(chatNameTextField.getText(),addedUsersList);
+			ArrayList<String> addedModeratorsList = new ArrayList<>(addedModerators);
+			addModeratorListToChat(chatNameTextField.getText(),addedModeratorsList);
 		}
 	}
 
