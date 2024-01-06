@@ -151,10 +151,22 @@ public class DatabaseComm {
 	public ArrayList<Message> getMessages(){
 		ArrayList<Message> messages = new ArrayList<>();
 
-		Message message = new DatabaseComm.Message(0, "<html>by Michał Bernacki-Janson, <br>Kamil Godek and Jakub Klawon<br>asdasdasds</html>",2, 2);
+		int id = 1;
 
-		messages.add(message);
-		messages.add(message);
+		try {
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = "call show_messages(" + id + ");";
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()){
+				messages.add(new Message(rs.getInt("id"),rs.getString("content"),rs.getInt("user_id"),rs.getInt("answer_to_id")));
+			}
+			statement.close();
+			connection.close();
+		} catch (Exception exception){
+			exception.printStackTrace();
+			return null;
+		}
 
 		return messages;
 	}
@@ -278,66 +290,140 @@ public class DatabaseComm {
 		return  allChats;
 	}
 
-	public static boolean addUserToChat(String  chatName){
-		boolean operationSuces = true;
-
-		return operationSuces;
+	public static boolean addUserToChat(String  chatName){ ///todo to wlasciwie jest dodawnie czy dolaczanie?
+		try {
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "call join_conversation('" + chatName + "');";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public static boolean createChat(String  chatName, Image avatar){
-		boolean operationSuces = true;
 
-		return operationSuces;
+		try {
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement(); ///TODO utworzyc parametr do ustawiania opcji zaproszenia i konwersje image na blob
+			query = "call new_conversation('" + chatName +"'," + 0 + "," + null + ");";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
+	///TODO co to robi?
 	public static boolean addUserListToChat(String  chatName,ArrayList<String> usersNames){
 		boolean operationSuces = true;
 
 		return operationSuces;
 	}
 
-	//Dodatkowo dodaje rownież użytkownika Do moderatorów
+	//Dodatkowo dodaje rownież użytkownika Do moderatorów ///TODO co to robi skoro z automatu dodaje sie do moderatorow w bazie?
 	public static boolean addModeratorListToChat(String  chatName, ArrayList<String> usersNames){
 		boolean operationSuces = true;
 
 		return operationSuces;
 	}
 
-	//Musi sprawdzić czy użytkownik Nie jestModeratorem
+	//Musi sprawdzić czy użytkownik Nie jestModeratorem ///todo - nie ma procedury na usuwanie przez moderatora, istnieje tylko wywalenie samego siebie
 	public static boolean removeUserFromChat(String  chatName,String userNames){
-		boolean operationSuces = true;
-
-		return operationSuces;
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = ""; //remove_user_from_conversation pozwala na wywalenie siebie samego
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	//Obniża swoje uprawnienia
 	public static boolean downModeratorPermision(String  chatName){
-		boolean operationSuces = true;
-
-		return operationSuces;
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = "call delete_moderator('" + chatName + "');";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public static boolean removeModeratorFromChat(String  chatName, String userNames){
-		boolean operationSuces = true;
-
-		return operationSuces;
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = "call delete_moderator_by_moderator(" + userId + ",'" + chatName + "');";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public static boolean removeConversation(String  chatName){
-		boolean operationSuces = true;
-
-		return operationSuces;
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = "call chat_delete('" + chatName +"');";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public static boolean setConversationNewData(String  chatName, String newChatName,Image avatar){
-		boolean operationSuces = true;
-
-		return operationSuces;
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement(); ///todo opcja edycji zaproszenia w parametrze i zamiana avatara na bloba
+			query = "call modify_conversation_data('" + chatName + "','" + newChatName + "',0,null);";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
-	public static boolean removeUserFromPortal(String userNames){
-		boolean operationSuces = true;
-
-		return operationSuces;
+	public static boolean removeUserFromPortal(int removed_user_id){
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = "call remove_user_from_portal(" + removed_user_id + ");";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 
