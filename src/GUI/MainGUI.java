@@ -29,9 +29,8 @@ public class MainGUI extends JFrame implements ActionListener {
 
 	public static JScrollPane newMessagePane;
 	public static int respondingId = -1;
-	private static String curentConversationName;
+	private static String currentConversationName;
 	public static Image icon;
-
 	public static JPanel mContentPanel;
 
 	MainGUI(){
@@ -169,7 +168,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		if(e.getSource() == moderatorButtonMenu){
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Panel Mod");
-			ModeratorPanelFrame moderatorPanelFrame = new ModeratorPanelFrame(curentConversationName);
+			ModeratorPanelFrame moderatorPanelFrame = new ModeratorPanelFrame(currentConversationName);
 		}
 		if(e.getSource() == createChatButtonMenu){
 			//Wyświetlenie Panelu Moderatora
@@ -272,7 +271,7 @@ public class MainGUI extends JFrame implements ActionListener {
 
 		conversationListPanelElement(Conversation conversation) { //TODO wejściem powinien być obiekt zawierający wszystkie dane o konwersacji
 			String name = conversation.name;
-			MainGUI.curentConversationName = name;
+			MainGUI.currentConversationName = name;
 			AvatarPanel graphicsPanel = new AvatarPanel(conversation.avatar);
 			chatName = new JLabel(name);
 
@@ -320,8 +319,6 @@ public class MainGUI extends JFrame implements ActionListener {
 		private Image obraz;
 
 		public AvatarPanel(Image obraz) {
-			// Domyślny obrazek, można go później zmienić używając setObraz(Image image)
-			//obraz = new ImageIcon("src/textures/avatar2.png").getImage();
 			this.obraz = obraz;
 			setPreferredSize(new Dimension(50, 40));
 			setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));  // Ustawia maksymalny rozmiar szerokości
