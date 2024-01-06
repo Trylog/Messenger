@@ -3,9 +3,22 @@ package Main;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.sql.*;
 import java.util.HashMap;
+import javax.sql.*;
+import javax.tools.Tool;
+
 public class DatabaseComm {
-	public int userId; //login userId
+	private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase";
+	private static String DBUSER;
+	private static String DBPASS;
+	private final static String DBDRIVER = "com.mysql.cj.jdbc.Driver";
+
+	private static Connection connection;
+	private static Statement statement;
+	private static String query;
+
+	public static int userId;
 
 	public static boolean isAdmin;
 
@@ -37,6 +50,8 @@ public class DatabaseComm {
 		}
 	}
 
+	private static User currentuser;
+
 	public static class Conversation{
 		public int id;
 		public String name;
@@ -50,19 +65,67 @@ public class DatabaseComm {
 	}
 
 	public boolean login(String login, String password){
-		System.out.println("Logowanie");
+		DBUSER = login;
+		DBPASS = password;
+		try{
+			Class.forName(DBDRIVER);
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			query = "SELECT * FROM users WHERE id = '" + login + "'";
+			statement = connection.createStatement();
+			try{
+				ResultSet rs = statement.executeQuery(query);
+				rs.next();
+				userId = rs.getInt("id");
+				String username = rs.getString("first_name") +" "+ rs.getString("last_name");
+				byte[] image = null;
+				//image = rs.getBytes("avatar");
+				//Image img = Toolkit.getDefaultToolkit().createImage(image);
+				//ImageIcon icon = new ImageIcon(img);
+				currentuser = new User(userId,username,new ImageIcon("src/textures/avatar.png"));
+				statement.close();
+				connection.close();
+			} catch (Exception e){
+				e.printStackTrace();
+				statement.close();
+				connection.close();
+				return false;
+			}
+			DBUSER = String.valueOf(userId);
+			DBPASS = password;
+			try{
+				connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			} catch (Exception e){
+				return false;
+			}
+			connection.close();
+		} catch (Exception ex){
+			ex.printStackTrace();
+			return false;
+		}
 		return true;
 	}
 
 	public void sendMessage(int conversationId, String content, int answerToId){
+		try{
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "call send_message(" + "'" + content +"'" + "," + conversationId + "," + answerToId + ")";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+		} catch (Exception ex){
+			ex.printStackTrace();
+			return;
+		}
 		System.out.println("Konwersacja: " + conversationId + "; Nowa wiadomość: " + content);
 	}
 
-	private int getCurrentUserId(){
-		return 1;
+	int getCurrentUserId(){
+		return userId;
 	}
 
 	public User getUser(int id){
+
 		return new User(id, "test username", new ImageIcon("src/textures/avatar.png"));
 	}
 
@@ -74,6 +137,10 @@ public class DatabaseComm {
 		reactions.put("❤", 1);
 		reactions.put("\uD83D\uDE22", 5);
 		return reactions;
+	}
+
+	public User getCurrentuser(){
+		return currentuser;
 	}
 
 	public void sendReaction(int msId, String reactionId){
@@ -91,26 +158,47 @@ public class DatabaseComm {
 
 		return messages;
 	}
-
-	//Nie podaje samego siebie
 	public static ArrayList <User> getPortalUsersNames(){
 		ArrayList <User> usersNames = new ArrayList<>();
 
-		//Tymczasowe
-		User user = new User(1,"Pan XYZ - PortalUser",null);
-		usersNames.add(user);
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = "SELECT * FROM users";
+			ResultSet rs = statement.executeQuery(query);
+			while(rs.next()){
+				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
+				usersNames.add(user);
+			}
+			statement.close();
+			connection.close();
+		} catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
 
 		return  usersNames;
 	}
 
-	//Nie podaje samego siebie
 	//UżytkownicyDanegoCzatu
 	public static ArrayList <User> getChatUsersNames(String chatName){
 		ArrayList <User> usersNames = new ArrayList<>();
-
-		//Tymczasowe
-		User user = new User(1,"Pan XYZ - CzatUser",null);
-		usersNames.add(user);
+		
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = "SELECT * FROM users WHERE name = '" + chatName + "'";
+			ResultSet rs = statement.executeQuery(query);
+			while(rs.next()){
+				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
+				usersNames.add(user);
+			}
+			statement.close();
+			connection.close();
+		} catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
 
 		return  usersNames;
 	}
@@ -120,16 +208,28 @@ public class DatabaseComm {
 	public static ArrayList <User> getChatModeratorsNames(String chatName){
 		ArrayList <User> usersNames = new ArrayList<>();
 
-		//Tymczasowe
-		User user = new User(1,"Pan XYZ - MODERATOR",null);
-		usersNames.add(user);
+		try{
+			connection = DriverManager.getConnection(DBURL,"root","1234");
+			statement = connection.createStatement();
+			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = 'XD'))";
+			ResultSet rs = statement.executeQuery(query);
+			while(rs.next()){
+				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
+				usersNames.add(user);
+			}
+			statement.close();
+			connection.close();
+		} catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
 
 		return  usersNames;
 	}
 
 	//Czy Dany Użytkownik Jest Adminem
 	public static boolean getAdminIs(){
-		boolean isAdmin = true;
+		boolean isAdmin = false;
 		return isAdmin;
 	}
 
@@ -142,10 +242,27 @@ public class DatabaseComm {
 	//Czaty do których należy użytkownik
 	public static ArrayList <Conversation> getUsersChat(){
 		ArrayList <Conversation> usersChats = new ArrayList<>();
-
-		//Tymczasowe
-		Conversation conversation = new Conversation(1,"Konwersacja 1",null);
-		usersChats.add(conversation);
+		ArrayList <Integer> conversationsIds = new ArrayList<>();
+		try{
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "call show_conversations(" + userId + ");";
+			ResultSet rs = statement.executeQuery(query);
+			while(rs.next()){
+				conversationsIds.add(rs.getInt("conversation_id"));
+			}
+			for(Integer integer : conversationsIds){
+				query = "SELECT * FROM conversations WHERE ID = " + integer;
+				rs = statement.executeQuery(query);
+				rs.next();
+				usersChats.add(new Conversation(rs.getInt("id"),rs.getString("name"),null));
+			}
+			statement.close();
+			connection.close();
+		} catch (Exception ex){
+			ex.printStackTrace();
+			return null;
+		}
 
 		return  usersChats;
 	}
@@ -161,7 +278,6 @@ public class DatabaseComm {
 		return  allChats;
 	}
 
-	//Dodaje użytkownika do czatu
 	public static boolean addUserToChat(String  chatName){
 		boolean operationSuces = true;
 
@@ -223,7 +339,6 @@ public class DatabaseComm {
 
 		return operationSuces;
 	}
-
 
 
 }
