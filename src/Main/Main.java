@@ -1,3 +1,7 @@
+package Main;
+
+import GUI.*;
+
 //Project by Michał Bernacki-Janson, Kamil Gondek and Jakub Klawon
 public class Main {
 

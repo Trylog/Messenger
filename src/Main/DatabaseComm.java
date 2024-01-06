@@ -1,14 +1,22 @@
+package Main;
+
 import javax.swing.*;
+import java.util.ArrayList;
 
 public class DatabaseComm {
+	public static int userId;
+
+	public static boolean isAdmin;
+
+	//public static ArrayList<Message>;
 
 	public static class Message{
-		int id;
-		String content;
-		int senderId;
+		public int id;
+		public String content;
+		public int senderId;
 		int answerToId;
 		///TODO time of writing
-		Message(int id, String content, int senderId, int answerToId){
+		public Message(int id, String content, int senderId, int answerToId){
 			this.id = id;
 			this.content = content;
 			this.senderId = senderId;
@@ -18,22 +26,22 @@ public class DatabaseComm {
 
 	public static class User{
 		int id;
-		String username;
-		Icon icon;
+		public String username;
+		public Icon icon;
 
 		User(int id, String username, Icon icon){
-			this.id =id;
+			this.id = id;
 			this.username = username;
 			this.icon = icon;
 		}
 	}
 
-	boolean login(String login, String password){
+	public boolean login(String login, String password){
 		System.out.println("Logowanie");
 		return true;
 	}
 
-	void sendMessage(int conversationId, String content, int answerToId){
+	public void sendMessage(int conversationId, String content, int answerToId){
 		System.out.println("Konwersacja: " + conversationId + "; Nowa wiadomość: " + content);
 	}
 
@@ -41,13 +49,16 @@ public class DatabaseComm {
 		return 1;
 	}
 
-	User getUser(int id){
+	public User getUser(int id){
 		return new User(id, "test username", new ImageIcon("src/textures/avatar.png"));
 	}
 
-	void sendReaction(int msId, String reactionId){
+	public void sendReaction(int msId, String reactionId){
+
 
 	}
+
+
 
 
 }
