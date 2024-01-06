@@ -7,7 +7,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
+import java.util.ArrayList;
+
 import Main.*;
+
+import static Main.DatabaseComm.*;
 
 public class MainGUI extends JFrame implements ActionListener {
 	public static JScrollPane messagesPanel;
@@ -95,6 +99,10 @@ public class MainGUI extends JFrame implements ActionListener {
 		adminButtonMenu.setFont(new Font("Arial", Font.BOLD, 11));
 		adminButtonMenu.addActionListener(this);
 		administratorButtonPanel.add(adminButtonMenu);
+		if(!getAdminIs()){
+			adminButtonMenu.setEnabled(false);
+		}
+
 
 		moderatorButtonPanel = new JPanel();
 		moderatorButtonPanel.setBounds(150, 640 - (4 * border), 150, 40);
@@ -107,6 +115,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		moderatorButtonMenu.setFont(new Font("Arial", Font.BOLD, 11));
 		moderatorButtonMenu.addActionListener(this);
 		moderatorButtonPanel.add(moderatorButtonMenu);
+		moderatorButtonMenu.setEnabled(false);
 
 		createChatButtonPanel = new JPanel();
 		createChatButtonPanel.setBounds(0, 610 - (4 * border), 150, 40);
@@ -133,9 +142,10 @@ public class MainGUI extends JFrame implements ActionListener {
 		joinChatButtonPanel.add(joinChatButtonButtonMenu);
 
 
-		// Dodajmy kilka przykładowych elementów do listy konwersacji
-		for (int i = 0; i < 20; i++) {
-			conversationListPanelElement element = new conversationListPanelElement(i + 1);
+		// Dodajmy elementów do listy czatów
+		ArrayList <Conversation> chats  = getUsersChat();
+		for(int i=0;i<chats.size();i++){
+			conversationListPanelElement element = new conversationListPanelElement(chats.get(i));
 			cContentPanel.add(element);
 		}
 
@@ -244,10 +254,10 @@ public class MainGUI extends JFrame implements ActionListener {
 	private static class conversationListPanelElement extends JPanel {
 		JLabel chatName;
 
-		conversationListPanelElement(int tempId) { //TODO wejściem powinien być obiekt zawierający wszystkie dane o konwersacji
-			String name = "Konwersacja " + tempId;
+		conversationListPanelElement(Conversation conversation) { //TODO wejściem powinien być obiekt zawierający wszystkie dane o konwersacji
+			String name = conversation.name;
 			MainGUI.curentConversationName = name;
-			AvatarPanel graphicsPanel = new AvatarPanel();
+			AvatarPanel graphicsPanel = new AvatarPanel(conversation.avatar);
 			chatName = new JLabel(name);
 
 			this.setBorder(BorderFactory.createTitledBorder(""));
@@ -269,7 +279,10 @@ public class MainGUI extends JFrame implements ActionListener {
 					// Po kliknięciu wypisz nazwę konwersacji w konsoli
 					System.out.println("Kliknięto konwersację: " + name);
 					MainGUI.messagesPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
-					MainGUI.displayedConversationId = tempId; //TODO zapisywane powinno być faktyczne id konwersacji
+					MainGUI.displayedConversationId = conversation.id; //TODO zapisywane powinno być faktyczne id konwersacji
+					if(getModeratorChatIs(name)){
+						moderatorButtonMenu.setEnabled(true);
+					}
 					//GUI.MainGUI.messangesPanel.revalidate(); //TODO odświeżanie zawartości messagesPanel
 					//GUI.MainGUI.messangesPanel.repaint();
 				}
@@ -290,9 +303,10 @@ public class MainGUI extends JFrame implements ActionListener {
 	private static class AvatarPanel extends JPanel {
 		private Image obraz;
 
-		public AvatarPanel() {
+		public AvatarPanel(Image obraz) {
 			// Domyślny obrazek, można go później zmienić używając setObraz(Image image)
-			obraz = new ImageIcon("src/textures/avatar2.png").getImage();
+			//obraz = new ImageIcon("src/textures/avatar2.png").getImage();
+			this.obraz = obraz;
 			setPreferredSize(new Dimension(50, 40));
 			setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));  // Ustawia maksymalny rozmiar szerokości
 		}

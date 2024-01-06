@@ -1,6 +1,7 @@
 package Main;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 
 public class DatabaseComm {
@@ -36,6 +37,18 @@ public class DatabaseComm {
 		}
 	}
 
+	public static class Conversation{
+		public int id;
+		public String name;
+		public Image avatar;
+
+		Conversation(int id, String name, Image avatar){
+			this.id = id;
+			this.name = name;
+			this.avatar = avatar;
+		}
+	}
+
 	public boolean login(String login, String password){
 		System.out.println("Logowanie");
 		return true;
@@ -58,7 +71,71 @@ public class DatabaseComm {
 
 	}
 
+	public static ArrayList <User> getPortalUsersNames(){
+		ArrayList <User> usersNames = new ArrayList<>();
 
+		//Tymczasowe
+		User user = new User(1,"Pan XYZ - PortalUser",null);
+		usersNames.add(user);
+
+		return  usersNames;
+	}
+
+	//UżytkownicyDanegoCzatu
+	public static ArrayList <User> getChatUsersNames(String chatName){
+		ArrayList <User> usersNames = new ArrayList<>();
+
+		//Tymczasowe
+		User user = new User(1,"Pan XYZ - CzatUser",null);
+		usersNames.add(user);
+
+		return  usersNames;
+	}
+
+	//ModeratorzyDanegoCzatu
+	public static ArrayList <User> getChatModeratorsNames(String chatName){
+		ArrayList <User> usersNames = new ArrayList<>();
+
+		//Tymczasowe
+		User user = new User(1,"Pan XYZ - MODERATOR",null);
+		usersNames.add(user);
+
+		return  usersNames;
+	}
+
+	//Czy Dany Użytkownik Jest Adminem
+	public static boolean getAdminIs(){
+		boolean isAdmin = false;
+		return isAdmin;
+	}
+
+	//Czy dany użytkownik Jest Moderatorem Tego Czatu
+	public static boolean getModeratorChatIs(String chatName){
+		boolean isModerator = false;
+		return isModerator;
+	}
+
+	//Czaty do których należy użytkownik
+	public static ArrayList <Conversation> getUsersChat(){
+		ArrayList <Conversation> usersChats = new ArrayList<>();
+
+		//Tymczasowe
+		Conversation conversation = new Conversation(1,"Konwersacja 1",null);
+		usersChats.add(conversation);
+
+		return  usersChats;
+	}
+
+	//Wszystkie istniejące czaty
+	public static ArrayList <Conversation> getAllChats(String chatName){
+		ArrayList <Conversation> allChats = new ArrayList<>();
+
+		//Tymczasowe
+		Conversation conversation = new Conversation(1,"Konwersacja 2",null);
+		allChats.add(conversation);
+
+		return  allChats;
+	}
 
 
 }
