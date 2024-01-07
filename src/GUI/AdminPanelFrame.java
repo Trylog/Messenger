@@ -1,13 +1,19 @@
 package GUI;
 
+import Main.DatabaseComm;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
- class AdminPanelFrame extends JFrame implements ActionListener {
+import static Main.DatabaseComm.*;
+
+class AdminPanelFrame extends JFrame implements ActionListener {
 	private JScrollPane userScrollPane;
 	private JPanel userListPanel;
 	private JTextField urserSearchField;
@@ -81,48 +87,17 @@ import java.awt.event.ActionListener;
 
 		// Grupa dla przycisków użytkowników
 		userButtonGroup = new ButtonGroup();
-
-		// Przykładowe dodanie kilku użytkowników
-		for (int i = 0; i < 20; i++) {
-			JToggleButton userButton = new JToggleButton("Użytkownik " + i);
-			userButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(270, 30);
-			userButton.setPreferredSize(buttonSize);
-			userButton.setMaximumSize(buttonSize);
-			userButton.addActionListener(new AdminPanelFrame.UserButtonListener());
-			userListPanel.add(userButton);
-			userButtonGroup.add(userButton);
-		}
+		//Dodawanie Urzytkowników portalu
+		refreshUserList();
 
 		// Grupa dla przycisków czatów
 		chatButtonGroup = new ButtonGroup();
-
-		// Przykładowe dodanie kilku czatów
-		for (int i = 0; i < 20; i++) {
-			JToggleButton chatButton = new JToggleButton("Czat " + i);
-			chatButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(270, 30);
-			chatButton.setPreferredSize(buttonSize);
-			chatButton.setMaximumSize(buttonSize);
-			chatButton.addActionListener(new AdminPanelFrame.ChatButtonListener());
-			chatListPanel.add(chatButton);
-			chatButtonGroup.add(chatButton);
-		}
+		// Załadowanie listy czatów
+		refreshChatList();
 
 		// Grupa dla przycisków moderatorów
 		moderatorButtonGroup = new ButtonGroup();
-
-		// Przykładowe dodanie kilku moderatorów
-		for (int i = 0; i < 20; i++) {
-			JToggleButton moderatorButton = new JToggleButton("Użytkownik " + i);
-			moderatorButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(270, 30);
-			moderatorButton.setPreferredSize(buttonSize);
-			moderatorButton.setMaximumSize(buttonSize);
-			moderatorButton.addActionListener(new AdminPanelFrame.ModeratorButtonListener());
-			moderatorListPanel.add(moderatorButton);
-			moderatorButtonGroup.add(moderatorButton);
-		}
+		//Lista tworzona dopiero w momencie wybrania
 
 		// Panel z wyszukiwaniem użytkowników
 		JPanel userSearchPanel = new JPanel();
@@ -232,6 +207,88 @@ import java.awt.event.ActionListener;
 		this.add(removeUserFormChatButton);
 
 	}
+
+	//Funkcje odpowiedzialne za odświerzanie listy urzytkowników portalu
+	private void refreshUserList(){
+		for (Enumeration<AbstractButton> buttons = userButtonGroup.getElements(); buttons.hasMoreElements(); ) {
+			AbstractButton button = buttons.nextElement();
+			userListPanel.remove(button);
+			userButtonGroup.remove(button);
+		}
+		//userListPanel.revalidate();
+		//userListPanel.repaint();
+		addUserToList();
+	}
+	private void addUserToList(){
+		ArrayList <DatabaseComm.User> users = getPortalUsersNames();
+		for (int i = 0; i < users.size(); i++) {
+			JToggleButton userButton = new JToggleButton(users.get(i).username);
+			userButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
+			Dimension buttonSize = new Dimension(270, 30);
+			userButton.setPreferredSize(buttonSize);
+			userButton.setMaximumSize(buttonSize);
+			userButton.addActionListener(new AdminPanelFrame.UserButtonListener());
+			userListPanel.add(userButton);
+			userButtonGroup.add(userButton);
+		}
+		userListPanel.revalidate();
+		userListPanel.repaint();
+	}
+
+	//Funkcja odpowiedzialna za odświerzanie listy chatów
+	private void refreshChatList() {
+		for (Enumeration<AbstractButton> buttons = chatButtonGroup.getElements(); buttons.hasMoreElements(); ) {
+			AbstractButton button = buttons.nextElement();
+			chatListPanel.remove(button);
+			chatButtonGroup.remove(button);
+		}
+		//chatListPanel.revalidate();
+		//chatListPanel.repaint();
+		addChatToList();
+	}
+	private void addChatToList() {
+		ArrayList <DatabaseComm.Conversation> chats = getAllChats();
+		for (int i = 0; i < chats.size(); i++) {
+			JToggleButton chatButton = new JToggleButton(chats.get(i).name);
+			chatButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+			Dimension buttonSize = new Dimension(270, 30);
+			chatButton.setPreferredSize(buttonSize);
+			chatButton.setMaximumSize(buttonSize);
+			chatButton.addActionListener(new AdminPanelFrame.ChatButtonListener());
+			chatListPanel.add(chatButton);
+			chatButtonGroup.add(chatButton);
+		}
+		chatListPanel.revalidate();
+		chatListPanel.repaint();
+	}
+
+	//Funkcja odpowiedzialna za odświerzanie listy moderatorów
+	private void refreshModeratorList(String chatName) {
+		for (Enumeration<AbstractButton> buttons = moderatorButtonGroup.getElements(); buttons.hasMoreElements(); ) {
+			AbstractButton button = buttons.nextElement();
+			moderatorListPanel.remove(button);
+			moderatorButtonGroup.remove(button);
+		}
+		//moderatorListPanel.revalidate();
+		//moderatorListPanel.repaint();
+		addModeratorToList(chatName);
+	}
+	private void addModeratorToList(String chatName) {
+		ArrayList <DatabaseComm.User> moderators = getChatModeratorsNames(chatName);
+		for (int i = 0; i < moderators.size(); i++) {
+			JToggleButton moderatorButton = new JToggleButton(moderators.get(i).username);
+			moderatorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+			Dimension buttonSize = new Dimension(270, 30);
+			moderatorButton.setPreferredSize(buttonSize);
+			moderatorButton.setMaximumSize(buttonSize);
+			moderatorButton.addActionListener(new AdminPanelFrame.ModeratorButtonListener());
+			moderatorListPanel.add(moderatorButton);
+			moderatorButtonGroup.add(moderatorButton);
+		}
+		moderatorListPanel.revalidate();
+		moderatorListPanel.repaint();
+	}
+
 	private void performSearchUsers() {
 		String searchPhrase = urserSearchField.getText().toLowerCase();
 		Component[] components = userListPanel.getComponents();
@@ -299,10 +356,32 @@ import java.awt.event.ActionListener;
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == removeUserFormPortalButton){
-			System.out.println("Użytkownik Usuniety");
+			if(userInfoTextArea.getText().equals("")){
+				JOptionPane.showMessageDialog(null, "Nie wybrano urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+			}else {
+				if(removeUserFromPortal(userInfoTextArea.getText())){
+					System.out.println("Urzytkownik usunięty z portalu " + userInfoTextArea.getText());
+					refreshUserList();
+					userInfoTextArea.setText("");
+				}else{
+					JOptionPane.showMessageDialog(null, "Nie udało się usunąć urzytkownika powód nieznany.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
+
+			}
+
 		}
 		if(e.getSource() == removeUserFormChatButton){
-			System.out.println("Moderator usunięty");
+			if(moderatorInfoTextArea.getText().equals("")){
+				JOptionPane.showMessageDialog(null, "Nie wybrano moderatora.", "Błąd", JOptionPane.ERROR_MESSAGE);
+			}else {
+				if(removeModeratorFromChat(chatInfoTextArea.getText(),moderatorInfoTextArea.getText())){
+					System.out.println("Moderator usunięty z czatu " + chatInfoTextArea.getText());
+					refreshModeratorList(chatInfoTextArea.getText());
+					moderatorInfoTextArea.setText("");
+				}else{
+					JOptionPane.showMessageDialog(null, "Nie udało się usunąć moderatora powód nieznany.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
+			}
 		}
 	}
 
@@ -323,6 +402,8 @@ import java.awt.event.ActionListener;
 			// W tej chwili zaznaczony przycisk można sprawdzić używając:
 			JToggleButton chatButton = (JToggleButton) e.getSource();
 			chatInfoTextArea.setText(chatButton.getText());
+			// Załadowanie listy moderatorów
+			refreshModeratorList(chatButton.getText());
 		}
 	}
 	private class ModeratorButtonListener implements ActionListener {

@@ -1,13 +1,19 @@
 package GUI;
 
+import Main.DatabaseComm;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
- class ModeratorPanelFrame extends JFrame implements ActionListener {
+import static Main.DatabaseComm.*;
+
+class ModeratorPanelFrame extends JFrame implements ActionListener {
 	private JScrollPane chatUserScrollPane;
 	private JPanel chatUserListPanel;
 	private JTextField chatUrserSearchField;
@@ -96,41 +102,9 @@ import java.awt.event.ActionListener;
 		// Grupa dla przycisków moderatora czatu
 		chatModeratorButtonGroup = new ButtonGroup();
 
-		// Przykładowe dodanie kilku użytkowników czatu
-		for (int i = 0; i < 20; i++) {
-			JToggleButton chatUserButton = new JToggleButton("Użytkownik " + i);
-			chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(270, 30);
-			chatUserButton.setPreferredSize(buttonSize);
-			chatUserButton.setMaximumSize(buttonSize);
-			chatUserButton.addActionListener(new ModeratorPanelFrame.ChatUserButtonListener());
-			chatUserListPanel.add(chatUserButton);
-			chatUserButtonGroup.add(chatUserButton);
-		}
-
-		// Przykładowe dodanie kilku użytkowników portalu
-		for (int i = 0; i < 20; i++) {
-			JToggleButton portalUserButton = new JToggleButton("Użytkownik " + i);
-			portalUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(270, 30);
-			portalUserButton.setPreferredSize(buttonSize);
-			portalUserButton.setMaximumSize(buttonSize);
-			portalUserButton.addActionListener(new ModeratorPanelFrame.PortalUserButtonListener());
-			portalUserListPanel.add(portalUserButton);
-			portalUserButtonGroup.add(portalUserButton);
-		}
-
-		// Przykładowe dodanie kilku użytkowników portalu
-		for (int i = 0; i < 20; i++) {
-			JToggleButton chatModeratorButton = new JToggleButton("Użytkownik " + i);
-			chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(270, 30);
-			chatModeratorButton.setPreferredSize(buttonSize);
-			chatModeratorButton.setMaximumSize(buttonSize);
-			chatModeratorButton.addActionListener(new ModeratorPanelFrame.ChatModeratorButtonListener());
-			chatModeratorListPanel.add(chatModeratorButton);
-			chatModeratorButtonGroup.add(chatModeratorButton);
-		}
+		refreshChatUserList();
+		refreshChatModeratorList();
+		refreshPortalUserList();
 
 		// Panel z wyszukiwaniem użytkowników czatu
 		JPanel chatUserSearchPanel = new JPanel();
@@ -249,7 +223,95 @@ import java.awt.event.ActionListener;
 		createButton(600 + move2,580+ border,300,30,removeConversationButton);
 	}
 
-	private void performSearchChatUsers() {
+	 // Odświeżanie listy użytkowników czatu
+	 private void refreshChatUserList() {
+		 for (Enumeration<AbstractButton> buttons = chatUserButtonGroup.getElements(); buttons.hasMoreElements(); ) {
+			 AbstractButton button = buttons.nextElement();
+			 chatUserListPanel.remove(button);
+			 chatUserButtonGroup.remove(button);
+		 }
+		 chatUserListPanel.revalidate();
+		 chatUserListPanel.repaint();
+		 addChatUsersToList();
+	 }
+
+	 // Odświeżanie listy użytkowników portalu
+	 private void refreshPortalUserList() {
+		 ArrayList<DatabaseComm.User> moderators = getChatUsersNames(chatName);
+		 for (Enumeration<AbstractButton> buttons = portalUserButtonGroup.getElements(); buttons.hasMoreElements(); ) {
+			 AbstractButton button = buttons.nextElement();
+			 portalUserListPanel.remove(button);
+			 portalUserButtonGroup.remove(button);
+		 }
+		 portalUserListPanel.revalidate();
+		 portalUserListPanel.repaint();
+		 addPortalUsersToList();
+	 }
+
+	// Odświeżanie listy moderatorów czatu
+	private void refreshChatModeratorList() {
+		for (Enumeration<AbstractButton> buttons = chatModeratorButtonGroup.getElements(); buttons.hasMoreElements(); ) {
+			AbstractButton button = buttons.nextElement();
+			chatModeratorListPanel.remove(button);
+			chatModeratorButtonGroup.remove(button);
+		}
+		chatModeratorListPanel.revalidate();
+		chatModeratorListPanel.repaint();
+		addChatModeratorsToList();
+	}
+
+	// Dodawanie przycisków użytkowników czatu
+	private void addChatUsersToList() {
+		ArrayList<DatabaseComm.User> chatUsers = getChatUsersNames(chatName);
+		for (int i = 0; i < chatUsers.size(); i++) {
+			JToggleButton chatUserButton = new JToggleButton(chatUsers.get(i).username);
+			chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+			Dimension buttonSize = new Dimension(270, 30);
+			chatUserButton.setPreferredSize(buttonSize);
+			chatUserButton.setMaximumSize(buttonSize);
+			chatUserButton.addActionListener(new ModeratorPanelFrame.ChatUserButtonListener());
+			chatUserListPanel.add(chatUserButton);
+			chatUserButtonGroup.add(chatUserButton);
+		}
+		chatUserListPanel.revalidate();
+		chatUserListPanel.repaint();
+	}
+
+	// Dodawanie przycisków użytkowników portalu
+	private void addPortalUsersToList() {
+		ArrayList<DatabaseComm.User> portalUsers = getPortalUsersNames();
+		for (int i = 0; i < portalUsers.size(); i++) {
+			JToggleButton portalUserButton = new JToggleButton(portalUsers.get(i).username);
+			portalUserButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+			Dimension buttonSize = new Dimension(270, 30);
+			portalUserButton.setPreferredSize(buttonSize);
+			portalUserButton.setMaximumSize(buttonSize);
+			portalUserButton.addActionListener(new ModeratorPanelFrame.PortalUserButtonListener());
+			portalUserListPanel.add(portalUserButton);
+			portalUserButtonGroup.add(portalUserButton);
+		}
+		portalUserListPanel.revalidate();
+		portalUserListPanel.repaint();
+	}
+
+	// Dodawanie przycisków moderatorów czatu
+	private void addChatModeratorsToList() {
+		ArrayList<DatabaseComm.User> moderators = getChatModeratorsNames(chatName);
+		for (int i = 0; i < moderators.size(); i++) {
+			JToggleButton chatModeratorButton = new JToggleButton(moderators.get(i).username);
+			chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+			Dimension buttonSize = new Dimension(270, 30);
+			chatModeratorButton.setPreferredSize(buttonSize);
+			chatModeratorButton.setMaximumSize(buttonSize);
+			chatModeratorButton.addActionListener(new ModeratorPanelFrame.ChatModeratorButtonListener());
+			chatModeratorListPanel.add(chatModeratorButton);
+			chatModeratorButtonGroup.add(chatModeratorButton);
+		}
+		chatModeratorListPanel.revalidate();
+		chatModeratorListPanel.repaint();
+	}
+
+	 private void performSearchChatUsers() {
 		String searchPhrase = chatUrserSearchField.getText().toLowerCase();
 		Component[] components = chatUserListPanel.getComponents();
 
@@ -278,6 +340,16 @@ import java.awt.event.ActionListener;
 		portalUserListPanel.repaint();
 	}
 
+	private boolean isUserInGroup(String username, ButtonGroup buttonGroup) {
+		for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements(); ) {
+			AbstractButton button = buttons.nextElement();
+			if (button instanceof JToggleButton && button.getText().equals(username)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void performSearchChatModerator() {
 		String searchPhrase = chatModeratorSearchField.getText().toLowerCase();
 		Component[] components = chatModeratorListPanel.getComponents();
@@ -296,23 +368,74 @@ import java.awt.event.ActionListener;
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == addUserToConversationButton){
-			System.out.println("Dodanie użytkownika");
+			if(portalUserInfoTextArea.getText().equals("")){
+				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+			}else{
+				if(isUserInGroup(portalUserInfoTextArea.getText(), chatUserButtonGroup)){
+					if(addUserToChat(chatName,portalUserInfoTextArea.getText())){
+						System.out.println("Dodanie użytkownika");
+					}else{
+						JOptionPane.showMessageDialog(null, "Nie udało się dodać urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+					}
+					refreshChatUserList();
+				}else{
+					JOptionPane.showMessageDialog(null, "Taki użytkownik znadjuje się już w konwersacji.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
+			}
 		}
 		if(e.getSource() == removeUserFromConversationButton){
-			System.out.println("Usuniecie użytkownika");
+			if(chatUserInfoTextArea.getText().equals("")){
+				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+			}else{
+				if(removeUserFromChat(chatName,chatUserInfoTextArea.getText())){
+					System.out.println("Usuniecie użytkownika");
+				}else{
+					JOptionPane.showMessageDialog(null, "Nie udało się usunąć urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
+				refreshChatUserList();
+			}
 		}
 		if(e.getSource() == downUserPermissions){
-			System.out.println("Obniżenie uprawnień");
+			if(chatModeratorInfoTextArea.getText().equals("")){
+				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+			}else{
+				if(downModeratorPermision(chatName,chatModeratorInfoTextArea.getText())){
+					System.out.println("Obniżenie uprawnień");
+				}else{
+					JOptionPane.showMessageDialog(null, "Nie udało się obniżyć uprawnień.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
+				refreshChatModeratorList();
+			}
+
 		}
 		if(e.getSource() == upUserPermissions){
-			System.out.println("Podniesienie uprawnień");
+			if(chatUserInfoTextArea.getText().equals("")){
+				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+			}else{
+				if(isUserInGroup(chatUserInfoTextArea.getText(), chatModeratorButtonGroup)){
+					if(upModeratorPermision(chatName,chatUserInfoTextArea.getText())){
+						System.out.println("Podniesienie uprawnień");
+					}else{
+						JOptionPane.showMessageDialog(null, "Nie udało się podnieść uprawneń.", "Błąd", JOptionPane.ERROR_MESSAGE);
+					}
+					refreshChatUserList();
+				}else{
+					JOptionPane.showMessageDialog(null, "Taki użytkownik ma już uprrawnieniea moderatora dla tego czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+
 		}
 		if(e.getSource() == editChatDataButton){
 			System.out.println("Edycja danych czatu");
 			ChatDataModyfieGUI chatDataModyfieGUI = new ChatDataModyfieGUI(chatName);
 		}
 		if(e.getSource() == removeConversationButton){
-			System.out.println("Konwersacja usunięta");
+			if(removeConversation(chatName)){
+				System.out.println("Konwersacja usunięta");
+			}else{
+				JOptionPane.showMessageDialog(null, "Nie udało się usunąć konwersacji.", "Błąd", JOptionPane.ERROR_MESSAGE);
+			}
+			dispose();
 		}
 	}
 

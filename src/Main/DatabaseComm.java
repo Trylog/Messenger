@@ -252,7 +252,7 @@ public class DatabaseComm {
 	}
 
 	//Czaty do których należy użytkownik
-	public static ArrayList <Conversation> getUsersChat(){
+	public static ArrayList <Conversation> getUserChats(){
 		ArrayList <Conversation> usersChats = new ArrayList<>();
 		ArrayList <Integer> conversationsIds = new ArrayList<>();
 		try{
@@ -280,7 +280,7 @@ public class DatabaseComm {
 	}
 
 	//Wszystkie istniejące czaty
-	public static ArrayList <Conversation> getAllChats(String chatName){
+	public static ArrayList <Conversation> getAllChats(){
 		ArrayList <Conversation> allChats = new ArrayList<>();
 
 		//Tymczasowe
@@ -303,6 +303,12 @@ public class DatabaseComm {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public static boolean addUserToChat(String  chatName,String  userName){
+		boolean operationSuces = true;
+
+		return operationSuces;
 	}
 
 	public static boolean createChat(String  chatName, Image avatar){
@@ -409,6 +415,7 @@ public class DatabaseComm {
 			e.printStackTrace();
 			return false;
 		}
+
 	}
 
 	public static boolean removeUserFromPortal(int removed_user_id){
