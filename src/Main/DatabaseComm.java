@@ -39,7 +39,7 @@ public class DatabaseComm {
 	}
 
 	public static class User{
-		int id;
+		public int id;
 		public String username;
 		public Icon icon;
 
@@ -69,7 +69,7 @@ public class DatabaseComm {
 		DBPASS = password;
 		try{
 			Class.forName(DBDRIVER);
-			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			query = "SELECT * FROM users WHERE id = '" + login + "'";
 			statement = connection.createStatement();
 			try{
@@ -154,7 +154,7 @@ public class DatabaseComm {
 		int id = 1;
 
 		try {
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			statement = connection.createStatement();
 			query = "call show_messages(" + id + ");";
 			ResultSet rs = statement.executeQuery(query);
@@ -174,7 +174,7 @@ public class DatabaseComm {
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			statement = connection.createStatement();
 			query = "SELECT * FROM users";
 			ResultSet rs = statement.executeQuery(query);
@@ -217,11 +217,11 @@ public class DatabaseComm {
 
 	//Nie podaje samego siebie
 	//ModeratorzyDanegoCzatu
-	public static ArrayList <User> getChatModeratorsNames(String chatName){
+	public static ArrayList <User> getChatModeratorsNames(String chatName){//Sprawdzić poprawność działania
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			statement = connection.createStatement();
 			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = 'XD'))";
 			ResultSet rs = statement.executeQuery(query);
@@ -312,7 +312,8 @@ public class DatabaseComm {
 		}
 	}
 
-	public static boolean addUserToChat(String  chatName,String  userName){
+	public static boolean addUserToChat(String  chatName,int userId){
+		System.out.println(userId);
 		boolean operationSuces = true;
 
 		return operationSuces;
@@ -334,23 +335,26 @@ public class DatabaseComm {
 		}
 	}
 	//dodaje uztykownikow z listy id do chatu
-	public static boolean addUserListToChat(String  chatName,ArrayList<String> usersNames){///todo zmiana arraylisty na int
+	public static boolean addUserListToChat(String  chatName,ArrayList<Integer> usersID){///todo zmiana arraylisty na int
+		System.out.println(usersID.get(0));
 		boolean operationSuces = true;
 
 		return operationSuces;
 	}
 
 	//dodaje moderatorow z listy id do modow chatu
-	public static boolean addModeratorListToChat(String  chatName, ArrayList<String> usersNames){
+	public static boolean addModeratorListToChat(String  chatName, ArrayList<Integer> usersID){
+		System.out.println(usersID.get(0));
 		boolean operationSuces = true;
 
 		return operationSuces;
 	}
 
 	//Musi sprawdzić czy użytkownik Nie jestModeratorem ///todo - nie ma procedury na usuwanie przez moderatora, istnieje tylko wywalenie samego siebie
-	public static boolean removeUserFromChat(String  chatName,String userNames){
+	public static boolean removeUserFromChat(String  chatName,int userId){
+		System.out.println(userId);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			statement = connection.createStatement();
 			query = ""; //remove_user_from_conversation pozwala na wywalenie siebie samego
 			statement.executeQuery(query);
@@ -364,9 +368,10 @@ public class DatabaseComm {
 	}
 
 	//Obniża swoje uprawnienia
-	public static boolean downModeratorPermision(String  chatName, String name){ ///todo zrobic id zamiast name
+	public static boolean downModeratorPermision(String  chatName, int userId){ ///todo zrobic id zamiast name
+		System.out.println(userId);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			statement = connection.createStatement();
 			query = "call delete_moderator('" + chatName + "');";
 			statement.executeQuery(query);
@@ -379,15 +384,17 @@ public class DatabaseComm {
 		}
 	}
 
-	public static boolean upModeratorPermision(String  chatName, String userNames){
+	public static boolean upModeratorPermision(String  chatName, int userId){
+		System.out.println(userId);
 		boolean operationSuces = true;
 
 		return operationSuces;
 	}
 
 	public static boolean removeModeratorFromChat(String  chatName, int user_id){
+		System.out.println(user_id);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			statement = connection.createStatement();
 			query = "call delete_moderator_by_moderator(" + userId + ",'" + chatName + "');";
 			statement.executeQuery(query);
@@ -402,7 +409,7 @@ public class DatabaseComm {
 
 	public static boolean removeConversation(String  chatName){
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			statement = connection.createStatement();
 			query = "call chat_delete('" + chatName +"');";
 			statement.executeQuery(query);
@@ -431,8 +438,9 @@ public class DatabaseComm {
 	}
 
 	public static boolean removeUserFromPortal(int removed_user_id){
+		System.out.println(removed_user_id);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,"root","admin1234");
 			statement = connection.createStatement();
 			query = "call remove_user_from_portal(" + removed_user_id + ");";
 			statement.executeQuery(query);

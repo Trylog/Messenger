@@ -19,21 +19,21 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	private JTextField chatUrserSearchField;
 	private ButtonGroup chatUserButtonGroup;
 	private JPanel chatUserInfoTextPanle;
-	private JTextArea chatUserInfoTextArea;
+	private SpecialTextArea chatUserInfoTextArea;
 
 	private JScrollPane portalUserScrollPane;
 	private JPanel portalUserListPanel;
 	private JTextField portalUrserSearchField;
 	private ButtonGroup portalUserButtonGroup;
 	private JPanel portalUserInfoTextPanle;
-	private JTextArea portalUserInfoTextArea;
+	private SpecialTextArea portalUserInfoTextArea;
 
 	private JScrollPane chatModeratorScrollPane;
 	private JPanel chatModeratorListPanel;
 	private JTextField chatModeratorSearchField;
 	private ButtonGroup chatModeratorButtonGroup;
 	private JPanel chatModeratorInfoTextPanle;
-	private JTextArea chatModeratorInfoTextArea;
+	private SpecialTextArea chatModeratorInfoTextArea;
 
 	private JButton editChatDataButton;
 	private JButton addUserToConversationButton;
@@ -187,14 +187,14 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		this.add(chatModeratorSearchPanel);
 
 		// Pole tekstowe z informacjami o wybranym użytkowniku czatu
-		chatUserInfoTextArea = new JTextArea();
+		chatUserInfoTextArea = new SpecialTextArea();
 		chatUserInfoTextPanle = createInfoTextArea(10,border * 4 + 440, "Wybrany użytkownik", 300, 60, chatUserInfoTextArea);
 
 		// Pole tekstowe z informacjami o wybranym użytkowniku portalu
-		portalUserInfoTextArea = new JTextArea();
+		portalUserInfoTextArea = new SpecialTextArea();
 		portalUserInfoTextPanle = createInfoTextArea(10 + 300,border * 4 + 440, "Wybrany użytkownik", 300, 60, portalUserInfoTextArea);
 
-		chatModeratorInfoTextArea = new JTextArea();
+		chatModeratorInfoTextArea = new SpecialTextArea();
 		chatModeratorInfoTextPanle = createInfoTextArea(10 + 600,border * 4 + 440, "Wybrany użytkownik", 300, 60, chatModeratorInfoTextArea);
 
 		int move2 = 10;
@@ -264,7 +264,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	private void addChatUsersToList() {
 		ArrayList<DatabaseComm.User> chatUsers = getChatUsersNames(chatName);
 		for (int i = 0; i < chatUsers.size(); i++) {
-			JToggleButton chatUserButton = new JToggleButton(chatUsers.get(i).username);
+			UsersToggleButton chatUserButton = new UsersToggleButton(chatUsers.get(i).id,chatUsers.get(i).username,chatUsers.get(i).icon);
 			chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 			Dimension buttonSize = new Dimension(270, 30);
 			chatUserButton.setPreferredSize(buttonSize);
@@ -281,7 +281,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	private void addPortalUsersToList() {
 		ArrayList<DatabaseComm.User> portalUsers = getPortalUsersNames();
 		for (int i = 0; i < portalUsers.size(); i++) {
-			JToggleButton portalUserButton = new JToggleButton(portalUsers.get(i).username);
+			UsersToggleButton portalUserButton = new UsersToggleButton(portalUsers.get(i).id,portalUsers.get(i).username,portalUsers.get(i).icon);
 			portalUserButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 			Dimension buttonSize = new Dimension(270, 30);
 			portalUserButton.setPreferredSize(buttonSize);
@@ -298,7 +298,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	private void addChatModeratorsToList() {
 		ArrayList<DatabaseComm.User> moderators = getChatModeratorsNames(chatName);
 		for (int i = 0; i < moderators.size(); i++) {
-			JToggleButton chatModeratorButton = new JToggleButton(moderators.get(i).username);
+			UsersToggleButton chatModeratorButton = new UsersToggleButton(moderators.get(i).id,moderators.get(i).username,moderators.get(i).icon);
 			chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 			Dimension buttonSize = new Dimension(270, 30);
 			chatModeratorButton.setPreferredSize(buttonSize);
@@ -316,8 +316,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		Component[] components = chatUserListPanel.getComponents();
 
 		for (Component component : components) {
-			if (component instanceof JToggleButton) {
-				JToggleButton chatUserButton = (JToggleButton) component;
+			if (component instanceof UsersToggleButton) {
+				UsersToggleButton chatUserButton = (UsersToggleButton) component;
 				String buttonText = chatUserButton.getText().toLowerCase();
 				chatUserButton.setVisible(buttonText.contains(searchPhrase));
 			}
@@ -330,8 +330,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		Component[] components = portalUserListPanel.getComponents();
 
 		for (Component component : components) {
-			if (component instanceof JToggleButton) {
-				JToggleButton portalUserButton = (JToggleButton) component;
+			if (component instanceof UsersToggleButton) {
+				UsersToggleButton portalUserButton = (UsersToggleButton) component;
 				String buttonText = portalUserButton.getText().toLowerCase();
 				portalUserButton.setVisible(buttonText.contains(searchPhrase));
 			}
@@ -343,7 +343,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	private boolean isUserInGroup(String username, ButtonGroup buttonGroup) {
 		for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements(); ) {
 			AbstractButton button = buttons.nextElement();
-			if (button instanceof JToggleButton && button.getText().equals(username)) {
+			if (button instanceof UsersToggleButton && button.getText().equals(username)) {
 				return true;
 			}
 		}
@@ -355,8 +355,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		Component[] components = chatModeratorListPanel.getComponents();
 
 		for (Component component : components) {
-			if (component instanceof JToggleButton) {
-				JToggleButton chatModeratorButton = (JToggleButton) component;
+			if (component instanceof UsersToggleButton) {
+				UsersToggleButton chatModeratorButton = (UsersToggleButton) component;
 				String buttonText = chatModeratorButton.getText().toLowerCase();
 				chatModeratorButton.setVisible(buttonText.contains(searchPhrase));
 			}
@@ -371,8 +371,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			if(portalUserInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
-				if(isUserInGroup(portalUserInfoTextArea.getText(), chatUserButtonGroup)){
-					if(addUserToChat(chatName,portalUserInfoTextArea.getText())){
+				if(!isUserInGroup(portalUserInfoTextArea.getText(), chatUserButtonGroup)){
+					if(addUserToChat(chatName,portalUserInfoTextArea.id)){
 						System.out.println("Dodanie użytkownika");
 					}else{
 						JOptionPane.showMessageDialog(null, "Nie udało się dodać urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -387,7 +387,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			if(chatUserInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
-				if(removeUserFromChat(chatName,chatUserInfoTextArea.getText())){
+				if(removeUserFromChat(chatName,chatUserInfoTextArea.id)){
 					System.out.println("Usuniecie użytkownika");
 				}else{
 					JOptionPane.showMessageDialog(null, "Nie udało się usunąć urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -399,7 +399,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			if(chatModeratorInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
-				if(downModeratorPermision(chatName,chatModeratorInfoTextArea.getText())){
+				if(downModeratorPermision(chatName,chatModeratorInfoTextArea.id)){
 					System.out.println("Obniżenie uprawnień");
 				}else{
 					JOptionPane.showMessageDialog(null, "Nie udało się obniżyć uprawnień.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -412,8 +412,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			if(chatUserInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
-				if(isUserInGroup(chatUserInfoTextArea.getText(), chatModeratorButtonGroup)){
-					if(upModeratorPermision(chatName,chatUserInfoTextArea.getText())){
+				if(!isUserInGroup(chatUserInfoTextArea.getText(), chatModeratorButtonGroup)){
+					if(upModeratorPermision(chatName,chatUserInfoTextArea.id)){
 						System.out.println("Podniesienie uprawnień");
 					}else{
 						JOptionPane.showMessageDialog(null, "Nie udało się podnieść uprawneń.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -445,8 +445,9 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// Możesz dodać tu kod obsługi zdarzenia dla wybranego użytkownika
 			// W tej chwili zaznaczony przycisk można sprawdzić używając:
-			JToggleButton chatUserButton = (JToggleButton) e.getSource();
+			UsersToggleButton chatUserButton = (UsersToggleButton) e.getSource();
 			chatUserInfoTextArea.setText(chatUserButton.getText());
+			chatUserInfoTextArea.id = chatUserButton.id;
 		}
 	}
 	private class PortalUserButtonListener implements ActionListener {
@@ -454,8 +455,9 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// Możesz dodać tu kod obsługi zdarzenia dla wybranego użytkownika
 			// W tej chwili zaznaczony przycisk można sprawdzić używając:
-			JToggleButton portalUserButton = (JToggleButton) e.getSource();
+			UsersToggleButton portalUserButton = (UsersToggleButton) e.getSource();
 			portalUserInfoTextArea.setText(portalUserButton.getText());
+			portalUserInfoTextArea.id = portalUserButton.id;
 		}
 	}
 	private class ChatModeratorButtonListener implements ActionListener {
@@ -463,11 +465,12 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// Możesz dodać tu kod obsługi zdarzenia dla wybranego użytkownika
 			// W tej chwili zaznaczony przycisk można sprawdzić używając:
-			JToggleButton chatModeratorButton = (JToggleButton) e.getSource();
+			UsersToggleButton chatModeratorButton = (UsersToggleButton) e.getSource();
 			chatModeratorInfoTextArea.setText(chatModeratorButton.getText());
+			chatModeratorInfoTextArea.id = chatModeratorButton.id;
 		}
 	}
-	private JPanel createInfoTextArea(int x, int y, String title, int width, int height, JTextArea infoTextArea ) {
+	private JPanel createInfoTextArea(int x, int y, String title, int width, int height, SpecialTextArea infoTextArea ) {
 		JPanel infoTextPanel = new JPanel();
 
 		infoTextPanel.setBorder(BorderFactory.createTitledBorder(title));
@@ -489,5 +492,22 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		button.setBounds(x,y,width,height);
 		button.addActionListener(this);
 		this.add(button);
+	}
+
+	private class UsersToggleButton extends JToggleButton {
+		int id;
+		String name;
+		Icon avatar;
+		UsersToggleButton(int id,String name,Icon avatar){
+			this.id = id;
+			this.name = name;
+			this.avatar = avatar;
+			setText(name);
+		}
+	}
+
+	private class SpecialTextArea extends JTextArea {
+		public int id;
+		public String text;
 	}
 }

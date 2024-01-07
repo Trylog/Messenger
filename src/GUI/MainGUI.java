@@ -33,7 +33,7 @@ public class MainGUI extends JFrame implements ActionListener {
 	public static Image icon;
 	public static JPanel mContentPanel;
 
-	JPanel cContentPanel;
+	static JPanel cContentPanel;
 
 	MainGUI(){
 
@@ -180,25 +180,23 @@ public class MainGUI extends JFrame implements ActionListener {
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("PStwórz czat");
 			CreateChatGUI createChatGUI = new CreateChatGUI();
-			refreshAllConversationsList(); ///todo sensowny refresh
 			currentConversationName = "";
 		}
 		if(e.getSource() == joinChatButtonButtonMenu){
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Dołącz do konwersacji");
 			JoinChatGUI joinChatGUI = new JoinChatGUI();
-			refreshAllConversationsList();
 			currentConversationName = "";
 		}
 	}
 
-	private void removeAllConversations() {
+	private static void removeAllConversations() {
 		cContentPanel.removeAll();
 		cContentPanel.revalidate();
 		cContentPanel.repaint();
 	}
 
-	private void refreshAllConversationsList() {
+	public static void refreshAllConversationsList() {
 		removeAllConversations();
 		ArrayList <Conversation> chats  = getUsersChat();
 		for(int i=0;i<chats.size();i++){
