@@ -33,6 +33,8 @@ public class MainGUI extends JFrame implements ActionListener {
 	public static Image icon;
 	public static JPanel mContentPanel;
 
+	JPanel cContentPanel;
+
 	MainGUI(){
 
 		messagesPanel = new JScrollPane();
@@ -83,7 +85,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		scrollPane.setBounds(0, 0, 300, 610 - (4 * border));
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-		JPanel cContentPanel = new JPanel();
+		cContentPanel = new JPanel();
 		cContentPanel.setLayout(new BoxLayout(cContentPanel, BoxLayout.Y_AXIS));
 
 		scrollPane.setViewportView(cContentPanel);
@@ -143,7 +145,7 @@ public class MainGUI extends JFrame implements ActionListener {
 
 
 		// Dodajmy elementów do listy czatów
-		ArrayList <Conversation> chats  = getUsersChat();
+		ArrayList <Conversation> chats  = getUserChats();
 		for(int i=0;i<chats.size();i++){
 			conversationListPanelElement element = new conversationListPanelElement(chats.get(i));
 			cContentPanel.add(element);
@@ -153,6 +155,8 @@ public class MainGUI extends JFrame implements ActionListener {
 		this.add(messagesPanel);
 		this.add(newMessagePane);
 		this.add(sendButton);
+
+		currentConversationName = new String("");
 
 	}
 	@Override
@@ -169,20 +173,40 @@ public class MainGUI extends JFrame implements ActionListener {
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Panel Mod");
 			ModeratorPanelFrame moderatorPanelFrame = new ModeratorPanelFrame(currentConversationName);
+			refreshAllConversationsList();
+			currentConversationName = "";
 		}
 		if(e.getSource() == createChatButtonMenu){
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("PStwórz czat");
 			CreateChatGUI createChatGUI = new CreateChatGUI();
-			//TODO Odświeżenie Listy Konwersacji
+			refreshAllConversationsList();
+			currentConversationName = "";
 		}
 		if(e.getSource() == joinChatButtonButtonMenu){
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Dołącz do konwersacji");
 			JoinChatGUI joinChatGUI = new JoinChatGUI();
-			//TODO Odświeżenie Listy Konwersacji
+			refreshAllConversationsList();
+			currentConversationName = "";
 		}
 	}
+
+	private void removeAllConversations() {
+		cContentPanel.removeAll();
+		cContentPanel.revalidate();
+		cContentPanel.repaint();
+	}
+
+	private void refreshAllConversationsList() {
+		removeAllConversations();
+		ArrayList <Conversation> chats  = getUserChats();
+		for(int i=0;i<chats.size();i++){
+			conversationListPanelElement element = new conversationListPanelElement(chats.get(i));
+			cContentPanel.add(element);
+		}
+	}
+
 	private static class MessagesListElement extends JPanel{
 
 		private static MessagesListElement currentRedLabel;
@@ -271,7 +295,6 @@ public class MainGUI extends JFrame implements ActionListener {
 
 		conversationListPanelElement(Conversation conversation) { //TODO wejściem powinien być obiekt zawierający wszystkie dane o konwersacji
 			String name = conversation.name;
-			MainGUI.currentConversationName = name;
 			AvatarPanel graphicsPanel = new AvatarPanel(conversation.avatar);
 			chatName = new JLabel(name);
 
@@ -298,6 +321,7 @@ public class MainGUI extends JFrame implements ActionListener {
 					if(getModeratorChatIs(name)){
 						moderatorButtonMenu.setEnabled(true);
 					}
+					currentConversationName = name;
 					//GUI.MainGUI.messangesPanel.revalidate(); //TODO odświeżanie zawartości messagesPanel
 					//GUI.MainGUI.messangesPanel.repaint();
 				}

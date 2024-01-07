@@ -140,7 +140,7 @@ public class DatabaseComm {
 	}
 
 	//Czaty do których należy użytkownik
-	public static ArrayList <Conversation> getUsersChat(){
+	public static ArrayList <Conversation> getUserChats(){
 		ArrayList <Conversation> usersChats = new ArrayList<>();
 
 		//Tymczasowe
@@ -151,7 +151,7 @@ public class DatabaseComm {
 	}
 
 	//Wszystkie istniejące czaty
-	public static ArrayList <Conversation> getAllChats(String chatName){
+	public static ArrayList <Conversation> getAllChats(){
 		ArrayList <Conversation> allChats = new ArrayList<>();
 
 		//Tymczasowe
@@ -163,6 +163,12 @@ public class DatabaseComm {
 
 	//Dodaje użytkownika do czatu
 	public static boolean addUserToChat(String  chatName){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	public static boolean addUserToChat(String  chatName,String  userName){
 		boolean operationSuces = true;
 
 		return operationSuces;
@@ -194,7 +200,13 @@ public class DatabaseComm {
 	}
 
 	//Obniża swoje uprawnienia
-	public static boolean downModeratorPermision(String  chatName){
+	public static boolean downModeratorPermision(String  chatName, String userNames){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	public static boolean upModeratorPermision(String  chatName, String userNames){
 		boolean operationSuces = true;
 
 		return operationSuces;
@@ -213,6 +225,7 @@ public class DatabaseComm {
 	}
 
 	public static boolean setConversationNewData(String  chatName, String newChatName,Image avatar){
+		//Jeżeli avatar == null nie zmieniaj awatara
 		boolean operationSuces = true;
 
 		return operationSuces;

@@ -1,5 +1,7 @@
 package GUI;
 
+import Main.DatabaseComm;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -142,21 +144,10 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		// Grupa dla przycisków moderatora czatu
 		chatModeratorButtonGroup = new ButtonGroup();
 
-		// Przykładowe dodanie kilku użytkowników czatu - Do usuniecia
-			/*for (int i = 0; i < 20; i++) {
-				JToggleButton chatUserButton = new JToggleButton("Użytkownik " + i);
-				chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-				Dimension buttonSize = new Dimension(270, 30);
-				chatUserButton.setPreferredSize(buttonSize);
-				chatUserButton.setMaximumSize(buttonSize);
-				chatUserButton.addActionListener(new ChatUserButtonListener());
-				chatUserListPanel.add(chatUserButton);
-				chatUserButtonGroup.add(chatUserButton);
-			}*/
-
-		// Przykładowe dodanie kilku użytkowników portalu
-		for (int i = 0; i < 20; i++) {
-			JToggleButton portalUserButton = new JToggleButton("Użytkownik " + i);
+		// Dodawanie użytkowników
+		ArrayList <DatabaseComm.User> users = getPortalUsersNames();
+		for (int i = 0; i < users.size(); i++) {
+			JToggleButton portalUserButton = new JToggleButton(users.get(i).username);
 			portalUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
 			Dimension buttonSize = new Dimension(270, 30);
 			portalUserButton.setPreferredSize(buttonSize);
@@ -165,18 +156,6 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			portalUserListPanel.add(portalUserButton);
 			portalUserButtonGroup.add(portalUserButton);
 		}
-
-		// Przykładowe dodanie kilku użytkowników portalu Do usunięcia
-			/*for (int i = 0; i < 20; i++) {
-				JToggleButton chatModeratorButton = new JToggleButton("Użytkownik " + i);
-				chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-				Dimension buttonSize = new Dimension(270, 30);
-				chatModeratorButton.setPreferredSize(buttonSize);
-				chatModeratorButton.setMaximumSize(buttonSize);
-				chatModeratorButton.addActionListener(new ChatModeratorButtonListener());
-				chatModeratorListPanel.add(chatModeratorButton);
-				chatModeratorButtonGroup.add(chatModeratorButton);
-			}*/
 
 		// Panel z wyszukiwaniem użytkowników czatu
 		JPanel chatUserSearchPanel = new JPanel();
@@ -511,6 +490,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			addUserListToChat(chatNameTextField.getText(),addedUsersList);
 			ArrayList<String> addedModeratorsList = new ArrayList<>(addedModerators);
 			addModeratorListToChat(chatNameTextField.getText(),addedModeratorsList);
+			dispose();
 		}
 	}
 
