@@ -249,7 +249,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	 }
 
 	// Odświeżanie listy moderatorów czatu
-	private void refreshChatModeratorList() {
+	private void refreshChatModeratorList() {  ///todo zapobiegac dodawaniu tego samego uzytkownika
 		for (Enumeration<AbstractButton> buttons = chatModeratorButtonGroup.getElements(); buttons.hasMoreElements(); ) {
 			AbstractButton button = buttons.nextElement();
 			chatModeratorListPanel.remove(button);

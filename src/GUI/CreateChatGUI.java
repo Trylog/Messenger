@@ -485,9 +485,9 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			downModeratorPermissionToUser(chatModeratorInfoTextArea.getText(),false);
 		}
 		if (e.getSource() == createChatButton) {
-			createChat(chatNameTextField.getText(),scaledImage); ///TODO po wywolaniu powinien byc update listy konwersacji uzytkownika?
+			createChat(chatNameTextField.getText(),scaledImage);
 			ArrayList<String> addedUsersList = new ArrayList<>(addedUsers);
-			addUserListToChat(chatNameTextField.getText(),addedUsersList);
+			addUserListToChat(chatNameTextField.getText(),addedUsersList); ///todo zmiana arraylista na int
 			ArrayList<String> addedModeratorsList = new ArrayList<>(addedModerators);
 			addModeratorListToChat(chatNameTextField.getText(),addedModeratorsList);
 			dispose();

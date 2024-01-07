@@ -197,9 +197,9 @@ public class DatabaseComm {
 		ArrayList <User> usersNames = new ArrayList<>();
 		
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
-			query = "SELECT * FROM users WHERE name = '" + chatName + "'";
+			query = "select * from users where id in (select user_id from conversation_members where conversation_id = (select id from conversations where name = '" + chatName + "'))";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
@@ -241,18 +241,18 @@ public class DatabaseComm {
 
 	//Czy Dany Użytkownik Jest Adminem
 	public static boolean getAdminIs(){
-		boolean isAdmin = false;
+		boolean isAdmin = true; ///todo sprawdzenie czy jest adminem
 		return isAdmin;
 	}
 
 	//Czy dany użytkownik Jest Moderatorem Tego Czatu
 	public static boolean getModeratorChatIs(String chatName){
-		boolean isModerator = true;
+		boolean isModerator = true; ///todo sprawdzenie czy jest modem czatu
 		return isModerator;
 	}
 
 	//Czaty do których należy użytkownik
-	public static ArrayList <Conversation> getUserChats(){
+	public static ArrayList <Conversation> getUsersChat(){
 		ArrayList <Conversation> usersChats = new ArrayList<>();
 		ArrayList <Integer> conversationsIds = new ArrayList<>();
 		try{
@@ -280,17 +280,24 @@ public class DatabaseComm {
 	}
 
 	//Wszystkie istniejące czaty
-	public static ArrayList <Conversation> getAllChats(){
-		ArrayList <Conversation> allChats = new ArrayList<>();
-
-		//Tymczasowe
-		Conversation conversation = new Conversation(1,"Konwersacja 2",null);
-		allChats.add(conversation);
-
-		return  allChats;
+	public static ArrayList <Conversation> getAllChats(){ ///todo wywalic te w ktorych jest user, dodac userid
+		ArrayList<Conversation> allChats = new ArrayList<>();
+		try {
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "SELECT * FROM conversations";
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()){
+				allChats.add(new Conversation(rs.getInt("id"),rs.getString("name"),null));
+			}
+		} catch (Exception exception){
+			exception.printStackTrace();
+			return null;
+		}
+		return allChats;
 	}
 
-	public static boolean addUserToChat(String  chatName){ ///todo to wlasciwie jest dodawnie czy dolaczanie?
+	public static boolean addUserToChat(String  chatName){ ///todo w joinie dodac zeby sprawdzal czy uzytkownik jest w czacie
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
@@ -326,14 +333,14 @@ public class DatabaseComm {
 			return false;
 		}
 	}
-	///TODO co to robi?
-	public static boolean addUserListToChat(String  chatName,ArrayList<String> usersNames){
+	//dodaje uztykownikow z listy id do chatu
+	public static boolean addUserListToChat(String  chatName,ArrayList<String> usersNames){///todo zmiana arraylisty na int
 		boolean operationSuces = true;
 
 		return operationSuces;
 	}
 
-	//Dodatkowo dodaje rownież użytkownika Do moderatorów ///TODO co to robi skoro z automatu dodaje sie do moderatorow w bazie?
+	//dodaje moderatorow z listy id do modow chatu
 	public static boolean addModeratorListToChat(String  chatName, ArrayList<String> usersNames){
 		boolean operationSuces = true;
 
@@ -357,7 +364,7 @@ public class DatabaseComm {
 	}
 
 	//Obniża swoje uprawnienia
-	public static boolean downModeratorPermision(String  chatName){
+	public static boolean downModeratorPermision(String  chatName, String name){ ///todo zrobic id zamiast name
 		try{
 			connection = DriverManager.getConnection(DBURL,"root","1234");
 			statement = connection.createStatement();
@@ -372,7 +379,13 @@ public class DatabaseComm {
 		}
 	}
 
-	public static boolean removeModeratorFromChat(String  chatName, String userNames){
+	public static boolean upModeratorPermision(String  chatName, String userNames){
+		boolean operationSuces = true;
+
+		return operationSuces;
+	}
+
+	public static boolean removeModeratorFromChat(String  chatName, int user_id){
 		try{
 			connection = DriverManager.getConnection(DBURL,"root","1234");
 			statement = connection.createStatement();
@@ -415,7 +428,6 @@ public class DatabaseComm {
 			e.printStackTrace();
 			return false;
 		}
-
 	}
 
 	public static boolean removeUserFromPortal(int removed_user_id){

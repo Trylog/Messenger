@@ -145,7 +145,7 @@ public class MainGUI extends JFrame implements ActionListener {
 
 
 		// Dodajmy elementów do listy czatów
-		ArrayList <Conversation> chats  = getUserChats();
+		ArrayList <Conversation> chats  = getUsersChat();
 		for(int i=0;i<chats.size();i++){
 			conversationListPanelElement element = new conversationListPanelElement(chats.get(i));
 			cContentPanel.add(element);
@@ -180,7 +180,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("PStwórz czat");
 			CreateChatGUI createChatGUI = new CreateChatGUI();
-			refreshAllConversationsList();
+			refreshAllConversationsList(); ///todo sensowny refresh
 			currentConversationName = "";
 		}
 		if(e.getSource() == joinChatButtonButtonMenu){
@@ -200,7 +200,7 @@ public class MainGUI extends JFrame implements ActionListener {
 
 	private void refreshAllConversationsList() {
 		removeAllConversations();
-		ArrayList <Conversation> chats  = getUserChats();
+		ArrayList <Conversation> chats  = getUsersChat();
 		for(int i=0;i<chats.size();i++){
 			conversationListPanelElement element = new conversationListPanelElement(chats.get(i));
 			cContentPanel.add(element);

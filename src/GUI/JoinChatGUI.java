@@ -1,5 +1,7 @@
 package GUI;
 
+import Main.DatabaseComm;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -7,6 +9,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+
+import Main.*;
 
 import static Main.DatabaseComm.*;
 
@@ -46,7 +50,7 @@ class JoinChatGUI extends JFrame implements ActionListener {
 		chatButtonGroup = new ButtonGroup();
 
 		// Dodajmy elementów do listy czatów
-		ArrayList <Conversation> chats  = getUserChats();
+		ArrayList <Conversation> chats  = getAllChats();
 		for (int i = 0; i < chats.size(); i++) {
 			JToggleButton chatButton = new JToggleButton(chats.get(i).name);
 			chatButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
