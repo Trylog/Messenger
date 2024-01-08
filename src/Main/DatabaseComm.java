@@ -111,7 +111,6 @@ public class DatabaseComm {
 				return false;
 			}
 			DBUSER = String.valueOf(userId);
-			DBPASS = password;
 			try{
 				connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			} catch (Exception e){
@@ -151,9 +150,10 @@ public class DatabaseComm {
 			query = "SELECT * FROM users WHERE ID = " + id + ";";
 			ResultSet rs = statement.executeQuery(query);
 			rs.next(); ///todo icon, ale to generalnie trzeba zrobic sensowna zamiane blob na image
+			User user = new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), null);
 			statement.close();
 			connection.close();
-			return new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), null);
+			return user;
 		} catch (Exception ex){
 			ex.printStackTrace();
 			return null;
@@ -272,7 +272,7 @@ public class DatabaseComm {
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
 			query = "SELECT * FROM users";
 			ResultSet rs = statement.executeQuery(query);
@@ -347,8 +347,8 @@ public class DatabaseComm {
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
-			query = "SELECT user_id FROM moderators WHERE conversation_id = " + chatName + ";";
-			ResultSet rs = statement.executeQuery(query);
+			query = "SELECT user_id FROM moderators WHERE conversation_id = (SELECT id FROM conversations WHERE name = '" + chatName + "');";
+			ResultSet rs = statement.executeQuery(query); ///todo BUG - jak kliknie sie na konwersacje w ktorej jest sie modem to potem mozna dostac sie do panelu innych ktorych sie nie jest
 			while (rs.next()){
 				if(rs.getInt("user_id")==userId) return true;
 			}
@@ -535,7 +535,7 @@ public class DatabaseComm {
 	public static boolean setConversationNewData(String  chatName, String newChatName,Image avatar){
 		try{
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,"1234");
-			statement = connection.createStatement(); ///todo opcja edycji zaproszenia w parametrze i zamiana avatara na bloba
+			statement = connection.createStatement(); ///todo opcja edycji zaproszenia w parametrze i zamiana avatara na bloba, uzytkownik "procedury@localhost" nie ma dostepu do tego, czemu?!
 			query = "call modify_conversation_data('" + chatName + "','" + newChatName + "',0,null);";
 			statement.executeQuery(query);
 			statement.close();
