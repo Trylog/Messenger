@@ -13,6 +13,7 @@ public class DatabaseComm {
 	private static String DBUSER;
 	private static String DBPASS;
 	private final static String DBDRIVER = "com.mysql.cj.jdbc.Driver";
+	private final static String DBROOTPASS = "1234";
 
 	private static Connection connection;
 	private static Statement statement;
@@ -69,7 +70,7 @@ public class DatabaseComm {
 		DBPASS = password;
 		try{
 			Class.forName(DBDRIVER);
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			query = "SELECT * FROM users WHERE id = '" + login + "'";
 			statement = connection.createStatement();
 			try{
@@ -154,7 +155,7 @@ public class DatabaseComm {
 		int id = 1;
 
 		try {
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call show_messages(" + id + ");";
 			ResultSet rs = statement.executeQuery(query);
@@ -174,7 +175,7 @@ public class DatabaseComm {
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
 			statement = connection.createStatement();
 			query = "SELECT * FROM users";
 			ResultSet rs = statement.executeQuery(query);
@@ -221,7 +222,7 @@ public class DatabaseComm {
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
 			statement = connection.createStatement();
 			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = 'XD'))";
 			ResultSet rs = statement.executeQuery(query);
@@ -354,7 +355,7 @@ public class DatabaseComm {
 	public static boolean removeUserFromChat(String  chatName,int userId){
 		System.out.println(userId);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
 			statement = connection.createStatement();
 			query = ""; //remove_user_from_conversation pozwala na wywalenie siebie samego
 			statement.executeQuery(query);
@@ -371,7 +372,7 @@ public class DatabaseComm {
 	public static boolean downModeratorPermision(String  chatName, int userId){ ///todo zrobic id zamiast name
 		System.out.println(userId);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call delete_moderator('" + chatName + "');";
 			statement.executeQuery(query);
@@ -394,7 +395,7 @@ public class DatabaseComm {
 	public static boolean removeModeratorFromChat(String  chatName, int user_id){
 		System.out.println(user_id);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call delete_moderator_by_moderator(" + userId + ",'" + chatName + "');";
 			statement.executeQuery(query);
@@ -409,7 +410,7 @@ public class DatabaseComm {
 
 	public static boolean removeConversation(String  chatName){
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call chat_delete('" + chatName +"');";
 			statement.executeQuery(query);
@@ -440,7 +441,7 @@ public class DatabaseComm {
 	public static boolean removeUserFromPortal(int removed_user_id){
 		System.out.println(removed_user_id);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","admin1234");
+			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call remove_user_from_portal(" + removed_user_id + ");";
 			statement.executeQuery(query);
