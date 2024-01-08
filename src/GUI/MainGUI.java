@@ -222,7 +222,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			JPanel messagePanel = new JPanel();
 			messagePanel.setLayout(new BorderLayout());
 
-			DatabaseComm.User user = Main.databaseComm.getUser(messageData.senderId);
+			DatabaseComm.User user = Main.databaseComm.getUser(messageData.senderId); ///todo reakcja na null
 			JLabel iconLabel = new JLabel(user.icon);
 			this.add(iconLabel);
 

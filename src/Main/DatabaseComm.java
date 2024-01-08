@@ -13,7 +13,8 @@ public class DatabaseComm {
 	private static String DBUSER;
 	private static String DBPASS;
 	private final static String DBDRIVER = "com.mysql.cj.jdbc.Driver";
-	private final static String DBROOTPASS = "1234";
+	private final static String DBOPERATOR = "procedury";
+	private final static String DBROOTPASS = "Proc@1234";
 
 	private static Connection connection;
 	private static Statement statement;
@@ -65,6 +66,23 @@ public class DatabaseComm {
 		}
 	}
 
+	//funkcja do rejestrowania nowego uzytkownika
+	public boolean register(String Imie, String Nazwisko, String password){ ///todo okienko do rejestracji = doslownie 3 pola tekstowe, ew. jakas opcja weryfikacji admina, image na blob
+		try{
+			Class.forName(DBDRIVER);
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
+			statement = connection.createStatement();
+			query = "call add_new_user(" + password + ", " + Imie + ", " + Nazwisko + ", null, False);";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
 	public boolean login(String login, String password){
 		DBUSER = login;
 		DBPASS = password;
@@ -77,6 +95,7 @@ public class DatabaseComm {
 				ResultSet rs = statement.executeQuery(query);
 				rs.next();
 				userId = rs.getInt("id");
+				isAdmin = rs.getBoolean("is_admin");
 				String username = rs.getString("first_name") +" "+ rs.getString("last_name");
 				byte[] image = null;
 				//image = rs.getBytes("avatar");
@@ -126,17 +145,70 @@ public class DatabaseComm {
 	}
 
 	public User getUser(int id){
-
-		return new User(id, "test username", new ImageIcon("src/textures/avatar.png"));
+		try{
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "SELECT * FROM users WHERE ID = " + id + ";";
+			ResultSet rs = statement.executeQuery(query);
+			rs.next(); ///todo icon, ale to generalnie trzeba zrobic sensowna zamiane blob na image
+			statement.close();
+			connection.close();
+			return new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), null);
+		} catch (Exception ex){
+			ex.printStackTrace();
+			return null;
+		}
 	}
 
 	public HashMap<String, Integer> getReactions(int msId){
-
 		HashMap<String, Integer> reactions = new HashMap<>();
+		int[] counts = {0,0,0,0,0,0,0,0};
+		String[] reaction = {"❤","❤","❤","❤","❤","❤","❤","❤"}; ///todo dodac rodzaje emotikonow
+		try{
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "SELECT * FROM interactions WHERE MESSAGE_ID = " + msId + ";";
+			ResultSet rs = statement.executeQuery(query);
+			while(rs.next()){
+				switch (rs.getInt("type_of_interaction")){
+					case 0:
+						counts[0]++;
+						break;
+					case 1:
+						counts[1]++;
+						break;
+					case 2:
+						counts[2]++;
+						break;
+					case 3:
+						counts[3]++;
+						break;
+					case 4:
+						counts[4]++;
+						break;
+					case 5:
+						counts[5]++;
+						break;
+					case 6:
+						counts[6]++;
+						break;
+					case 7:
+						counts[7]++;
+						break;
+				}
+			}
+			statement.close();
+			connection.close();
+		} catch (Exception ex){
+			ex.printStackTrace();
+			return null;
+		}
+		for(int i=0;i<7;i++){
+			if (counts[i]>0){
+				reactions.put(reaction[i],counts[i]);
+			}
+		}
 		//dane do testów
-		reactions.put("\uD83D\uDC4D", 2);
-		reactions.put("❤", 1);
-		reactions.put("\uD83D\uDE22", 5);
 		return reactions;
 	}
 
@@ -145,20 +217,46 @@ public class DatabaseComm {
 	}
 
 	public void sendReaction(int msId, String reactionId){
-
-
+		int typeOfReaction = -1;
+		String[] reaction = {"❤","❤","❤","❤","❤","❤","❤","❤"}; ///todo dodac rodzaje emotikonow
+		for(int i=0;i<7;i++){
+			if(reactionId.equals(reaction[i])) typeOfReaction = i;
+		}
+		if (typeOfReaction==-1) return;
+		try{
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "call send_interaction(" + typeOfReaction + ", " + msId + ");";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			System.out.println("Wyslano reakcje do wiadomosci o id: " + msId + ". Id reakcji: " + typeOfReaction);
+		} catch (Exception exception){
+			exception.printStackTrace();
+			return;
+		}
 	}
 
 	public ArrayList<Message> getMessages(){
 		ArrayList<Message> messages = new ArrayList<>();
 
-		int id = 1;
+		int id;
 
 		try {
-			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
+			ResultSet rs;
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
+			try{
+				query = "SELECT conversation_id FROM conversation_members WHERE user_id = " + userId + ";";
+				rs = statement.executeQuery(query);
+				rs.next();
+				id = rs.getInt("conversation_id");
+			} catch (Exception e){
+				e.printStackTrace();
+				id = 1;
+			}
 			query = "call show_messages(" + id + ");";
-			ResultSet rs = statement.executeQuery(query);
+			rs = statement.executeQuery(query);
 			while (rs.next()){
 				messages.add(new Message(rs.getInt("id"),rs.getString("content"),rs.getInt("user_id"),rs.getInt("answer_to_id")));
 			}
@@ -168,14 +266,13 @@ public class DatabaseComm {
 			exception.printStackTrace();
 			return null;
 		}
-
 		return messages;
 	}
 	public static ArrayList <User> getPortalUsersNames(){
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
-			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			query = "SELECT * FROM users";
 			ResultSet rs = statement.executeQuery(query);
@@ -222,7 +319,7 @@ public class DatabaseComm {
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
-			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = 'XD'))";
 			ResultSet rs = statement.executeQuery(query);
@@ -242,14 +339,26 @@ public class DatabaseComm {
 
 	//Czy Dany Użytkownik Jest Adminem
 	public static boolean getAdminIs(){
-		boolean isAdmin = true; ///todo sprawdzenie czy jest adminem
 		return isAdmin;
 	}
 
 	//Czy dany użytkownik Jest Moderatorem Tego Czatu
 	public static boolean getModeratorChatIs(String chatName){
-		boolean isModerator = true; ///todo sprawdzenie czy jest modem czatu
-		return isModerator;
+		try {
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "SELECT user_id FROM moderators WHERE conversation_id = " + chatName + ";";
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()){
+				if(rs.getInt("user_id")==userId) return true;
+			}
+			statement.close();
+			connection.close();
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		return false;
 	}
 
 	//Czaty do których należy użytkownik
@@ -355,7 +464,7 @@ public class DatabaseComm {
 	public static boolean removeUserFromChat(String  chatName,int userId){
 		System.out.println(userId);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			query = ""; //remove_user_from_conversation pozwala na wywalenie siebie samego
 			statement.executeQuery(query);
@@ -372,7 +481,7 @@ public class DatabaseComm {
 	public static boolean downModeratorPermision(String  chatName, int userId){ ///todo zrobic id zamiast name
 		System.out.println(userId);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call delete_moderator('" + chatName + "');";
 			statement.executeQuery(query);
@@ -395,7 +504,7 @@ public class DatabaseComm {
 	public static boolean removeModeratorFromChat(String  chatName, int user_id){
 		System.out.println(user_id);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call delete_moderator_by_moderator(" + userId + ",'" + chatName + "');";
 			statement.executeQuery(query);
@@ -410,7 +519,7 @@ public class DatabaseComm {
 
 	public static boolean removeConversation(String  chatName){
 		try{
-			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call chat_delete('" + chatName +"');";
 			statement.executeQuery(query);
@@ -425,7 +534,7 @@ public class DatabaseComm {
 
 	public static boolean setConversationNewData(String  chatName, String newChatName,Image avatar){
 		try{
-			connection = DriverManager.getConnection(DBURL,"root","1234");
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,"1234");
 			statement = connection.createStatement(); ///todo opcja edycji zaproszenia w parametrze i zamiana avatara na bloba
 			query = "call modify_conversation_data('" + chatName + "','" + newChatName + "',0,null);";
 			statement.executeQuery(query);
@@ -441,7 +550,7 @@ public class DatabaseComm {
 	public static boolean removeUserFromPortal(int removed_user_id){
 		System.out.println(removed_user_id);
 		try{
-			connection = DriverManager.getConnection(DBURL,"root",DBROOTPASS);
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			query = "call remove_user_from_portal(" + removed_user_id + ");";
 			statement.executeQuery(query);
