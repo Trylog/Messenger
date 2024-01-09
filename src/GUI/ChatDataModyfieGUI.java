@@ -64,8 +64,6 @@ class ChatDataModyfieGUI extends JFrame implements ActionListener {
 		confirmNameAndAvatarButton.addActionListener(this);
 		this.add(confirmNameAndAvatarButton);
 
-
-		//TODO Możliwość zmiany Nazwy czatu + możliwość zmiany awatara czatu
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {

@@ -52,6 +52,8 @@ class CreateChatGUI extends JFrame implements ActionListener {
 	private JPanel chatModeratorInfoTextPanle;
 	private SpecialTextArea chatModeratorInfoTextArea;
 	private Image scaledImage;
+	private JToggleButton invitationtoggleButton;
+	private JLabel autoInvitationLabel;
 
 	CreateChatGUI() {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -98,9 +100,20 @@ class CreateChatGUI extends JFrame implements ActionListener {
 
 		// Przycisk do zatwierdzenia podstawowych danych
 		createChatButton = new JButton("Utwórz");
-		createChatButton.setBounds(border + 595,  border + 5, 300, 125);
+		createChatButton.setBounds(border + 595,  border + 5, 300, 100);
 		createChatButton.addActionListener(this);
 		this.add(createChatButton);
+
+		//Label trybu zapraszania
+		autoInvitationLabel = new JLabel("Automatyczne zapraszanie:");
+		autoInvitationLabel.setBounds(border +630,  border + 105, 200, 25);
+		this.add(autoInvitationLabel);
+
+		//Przełącznik trybu zapraszania
+		invitationtoggleButton = new JToggleButton("OFF");
+		invitationtoggleButton.setBounds(border + 795,  border + 105, 100, 25);
+		invitationtoggleButton.addActionListener(this);
+		this.add(invitationtoggleButton);
 
 		// Panel z przewijaniem dla użytkowników czatu
 		chatUserScrollPane = new JScrollPane();
@@ -119,7 +132,6 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		chatModeratorScrollPane.setBorder(BorderFactory.createTitledBorder("Lista Moderatorów Czatu"));
 		chatModeratorScrollPane.setBounds(border+600, border+140, 300, 200);
 		chatModeratorScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
 
 		// Panel z komponentami użytkowników czatu(dodaj swoje komponenty)
 		chatUserListPanel = new JPanel();
@@ -507,13 +519,29 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			downModeratorPermissionToUser(chatModeratorInfoTextArea.getText(),chatModeratorInfoTextArea.id,false);
 		}
 		if (e.getSource() == createChatButton) {
-			createChat(chatNameTextField.getText(),scaledImage);
+			boolean invitation;
+			if(invitationtoggleButton.getText().equals("ON")){
+				invitation = true;
+			}else {
+				invitation = false;
+			}
+			createChat(chatNameTextField.getText(),scaledImage,invitation);
 			ArrayList<Integer> addedUsersID = new ArrayList<>(addedUsers);
 			addUserListToChat(chatNameTextField.getText(),addedUsersID);
 			ArrayList<Integer> addedModeratorsID = new ArrayList<>(addedModerators);
 			addModeratorListToChat(chatNameTextField.getText(),addedModeratorsID);
 			refreshAllConversationsList();
 			dispose();
+		}
+		if (e.getSource() == invitationtoggleButton) {
+			// Zmiana tekstu w zależności od stanu przełącznika
+			if (invitationtoggleButton.isSelected()) {
+				invitationtoggleButton.setText("ON");
+				// Wykonaj dodatkowe działania, gdy przełącznik jest w stanie ON
+			} else {
+				invitationtoggleButton.setText("OFF");
+				// Wykonaj dodatkowe działania, gdy przełącznik jest w stanie OFF
+			}
 		}
 	}
 

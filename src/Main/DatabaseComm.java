@@ -315,13 +315,13 @@ public class DatabaseComm {
 
 	//Nie podaje samego siebie
 	//ModeratorzyDanegoCzatu
-	public static ArrayList <User> getChatModeratorsNames(String chatName){//Sprawdzić poprawność działania
+	public static ArrayList <User> getChatModeratorsNames(String chatName){//TODO Funkcja nie zwraca moderatorów Sprawdzić poprawność działania
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
-			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = 'XD'))";
+			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = chatName))";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
@@ -429,7 +429,7 @@ public class DatabaseComm {
 		return operationSuces;
 	}
 
-	public static boolean createChat(String  chatName, Image avatar){
+	public static boolean createChat(String  chatName, Image avatar,boolean invitationMode){
 
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
@@ -453,7 +453,7 @@ public class DatabaseComm {
 	}
 
 	//dodaje moderatorow z listy id do modow chatu
-	public static boolean addModeratorListToChat(String  chatName, ArrayList<Integer> usersID){
+	public static boolean addModeratorListToChat(String  chatName, ArrayList<Integer> usersID){//TODO Zabezpieczenie co jeżeli puste
 		System.out.println(usersID.get(0));
 		boolean operationSuces = true;
 

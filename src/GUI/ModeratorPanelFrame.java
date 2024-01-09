@@ -249,7 +249,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	 }
 
 	// Odświeżanie listy moderatorów czatu
-	private void refreshChatModeratorList() {  ///todo zapobiegac dodawaniu tego samego uzytkownika
+	private void refreshChatModeratorList() {
 		for (Enumeration<AbstractButton> buttons = chatModeratorButtonGroup.getElements(); buttons.hasMoreElements(); ) {
 			AbstractButton button = buttons.nextElement();
 			chatModeratorListPanel.remove(button);
@@ -295,7 +295,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	}
 
 	// Dodawanie przycisków moderatorów czatu
-	private void addChatModeratorsToList() {
+	private void addChatModeratorsToList() {//TODO Sprawdzić czemu nie dodaje - Powód brak odczytu działa na zasadzie ponownego odczytu
 		ArrayList<DatabaseComm.User> moderators = getChatModeratorsNames(chatName);
 		for (int i = 0; i < moderators.size(); i++) {
 			UsersToggleButton chatModeratorButton = new UsersToggleButton(moderators.get(i).id,moderators.get(i).username,moderators.get(i).icon);

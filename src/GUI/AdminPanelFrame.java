@@ -364,7 +364,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			if(userInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else {
-				if(removeUserFromPortal(userInfoTextArea.id)){ ///todo na user id
+				if(removeUserFromPortal(userInfoTextArea.id)){
 					System.out.println("Urzytkownik usunięty z portalu " + userInfoTextArea.getText());
 					refreshUserList();
 					userInfoTextArea.setText("");
@@ -379,7 +379,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			if(moderatorInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano moderatora.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else {
-				if(removeModeratorFromChat(chatInfoTextArea.getText(),moderatorInfoTextArea.id)){ ///todo zadbac o inta
+				if(removeModeratorFromChat(chatInfoTextArea.getText(),moderatorInfoTextArea.id)){
 					System.out.println("Moderator usunięty z czatu " + chatInfoTextArea.getText());
 					refreshModeratorList(chatInfoTextArea.getText());
 					moderatorInfoTextArea.setText("");

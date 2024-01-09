@@ -59,7 +59,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
 		messagesPanel.setViewportView(mContentPanel);
 
-		var messages = Main.databaseComm.getMessages();
+		var messages = Main.databaseComm.getMessages();//TODO Brak początkowo wiadomości
 
 		for(var message : messages){
 			MessagesListElement element = new MessagesListElement(message);
@@ -291,7 +291,7 @@ public class MainGUI extends JFrame implements ActionListener {
 	private static class conversationListPanelElement extends JPanel {
 		JLabel chatName;
 
-		conversationListPanelElement(Conversation conversation) { //TODO wejściem powinien być obiekt zawierający wszystkie dane o konwersacji
+		conversationListPanelElement(Conversation conversation) {
 			String name = conversation.name;
 			AvatarPanel graphicsPanel = new AvatarPanel(conversation.avatar);
 			chatName = new JLabel(name);
@@ -315,13 +315,14 @@ public class MainGUI extends JFrame implements ActionListener {
 					// Po kliknięciu wypisz nazwę konwersacji w konsoli
 					System.out.println("Kliknięto konwersację: " + name);
 					MainGUI.messagesPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
-					MainGUI.displayedConversationId = conversation.id; //TODO zapisywane powinno być faktyczne id konwersacji
+					MainGUI.displayedConversationId = conversation.id;
 					if(getModeratorChatIs(name)){
 						moderatorButtonMenu.setEnabled(true);
+					}else{
+						moderatorButtonMenu.setEnabled(false);
 					}
 					currentConversationName = name;
-					//GUI.MainGUI.messangesPanel.revalidate(); //TODO odświeżanie zawartości messagesPanel
-					//GUI.MainGUI.messangesPanel.repaint();
+
 				}
 			});
 		}
