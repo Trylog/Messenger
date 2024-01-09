@@ -83,7 +83,7 @@ public class DatabaseComm {
 		return true;
 	}
 
-	public boolean login(String login, String password){
+	public boolean login(String login, String password){ ///todo zweryfikowac wplyw logowania na status, dodac funkcje ktora przy wylaczeniu aplikacji przestawi w tryb not_active
 		DBUSER = login;
 		DBPASS = password;
 		try{
@@ -277,6 +277,7 @@ public class DatabaseComm {
 			query = "SELECT * FROM users";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
+				if(rs.getString("is_deleted").equals("yes")) continue;
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
 				usersNames.add(user);
 			}
@@ -300,6 +301,7 @@ public class DatabaseComm {
 			query = "select * from users where id in (select user_id from conversation_members where conversation_id = (select id from conversations where name = '" + chatName + "'))";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
+				if(rs.getString("is_deleted").equals("yes")) continue; ///todo icon
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
 				usersNames.add(user);
 			}
@@ -321,9 +323,10 @@ public class DatabaseComm {
 		try{
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
-			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = chatName))";
+			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = '" + chatName + "'))";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
+				if(rs.getString("is_deleted").equals("yes")) continue;
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
 				usersNames.add(user);
 			}
@@ -407,7 +410,7 @@ public class DatabaseComm {
 		return allChats;
 	}
 
-	public static boolean addUserToChat(String  chatName){ ///todo w joinie dodac zeby sprawdzal czy uzytkownik jest w czacie
+	public static boolean addUserToChat(String  chatName){
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
@@ -534,8 +537,8 @@ public class DatabaseComm {
 
 	public static boolean setConversationNewData(String  chatName, String newChatName,Image avatar){
 		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,"1234");
-			statement = connection.createStatement(); ///todo opcja edycji zaproszenia w parametrze i zamiana avatara na bloba, uzytkownik "procedury@localhost" nie ma dostepu do tego, czemu?!
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
+			statement = connection.createStatement(); ///todo opcja edycji zaproszenia w parametrze i zamiana avatara na bloba
 			query = "call modify_conversation_data('" + chatName + "','" + newChatName + "',0,null);";
 			statement.executeQuery(query);
 			statement.close();

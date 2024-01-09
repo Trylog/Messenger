@@ -123,7 +123,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		createChatButtonPanel.setBounds(0, 610 - (4 * border), 150, 40);
 		this.add(createChatButtonPanel);
 
-		createChatButtonMenu = new JButton("Stwóż nowy czat");
+		createChatButtonMenu = new JButton("Stwórz nowy czat");
 		createChatButtonMenu.setPreferredSize(new Dimension(150, 30));
 		createChatButtonMenu.setHorizontalAlignment(SwingConstants.CENTER);
 		createChatButtonMenu.setVerticalAlignment(SwingConstants.CENTER);

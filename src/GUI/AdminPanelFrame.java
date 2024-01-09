@@ -267,7 +267,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 		chatListPanel.repaint();
 	}
 
-	//Funkcja odpowiedzialna za odświerzanie listy moderatorów
+	//Funkcja odpowiedzialna za odświezanie listy moderatorów
 	private void refreshModeratorList(String chatName) {
 		for (Enumeration<AbstractButton> buttons = moderatorButtonGroup.getElements(); buttons.hasMoreElements(); ) {
 			AbstractButton button = buttons.nextElement();
@@ -359,17 +359,17 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 		return infoTextPanel;
 	}
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) { ///todo po usunieciu nie aktualizuje, sprawdzic jaka funkcja dostarcza uzytkownikow, dodac zeby sprawdzala czy is_deleted jest true
 		if(e.getSource() == removeUserFormPortalButton){
 			if(userInfoTextArea.getText().equals("")){
-				JOptionPane.showMessageDialog(null, "Nie wybrano urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Nie wybrano uzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else {
 				if(removeUserFromPortal(userInfoTextArea.id)){
-					System.out.println("Urzytkownik usunięty z portalu " + userInfoTextArea.getText());
+					System.out.println("Uzytkownik usunięty z portalu " + userInfoTextArea.getText());
 					refreshUserList();
 					userInfoTextArea.setText("");
 				}else{
-					JOptionPane.showMessageDialog(null, "Nie udało się usunąć urzytkownika powód nieznany.", "Błąd", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Nie udało się usunąć uzytkownika powód nieznany.", "Błąd", JOptionPane.ERROR_MESSAGE);
 				}
 
 			}
