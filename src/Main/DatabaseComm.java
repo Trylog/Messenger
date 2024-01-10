@@ -1,7 +1,13 @@
 package Main;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.sql.*;
 import java.util.HashMap;
@@ -23,8 +29,6 @@ public class DatabaseComm {
 	public static int userId;
 
 	public static boolean isAdmin;
-
-	//public static ArrayList<Message>;
 
 	public static class Message{
 		public int id;
@@ -67,13 +71,21 @@ public class DatabaseComm {
 	}
 
 	//funkcja do rejestrowania nowego uzytkownika
-	public boolean register(String Imie, String Nazwisko, String password){ ///todo okienko do rejestracji = doslownie 3 pola tekstowe, ew. jakas opcja weryfikacji admina, image na blob
+	public boolean register(String Imie, String Nazwisko, String password, String filepath){ ///todo okienko do rejestracji = doslownie 3 pola tekstowe, ew. jakas opcja weryfikacji admina, dodanie avatara
 		try{
 			Class.forName(DBDRIVER);
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
-			query = "call add_new_user(" + password + ", " + Imie + ", " + Nazwisko + ", null, False);";
-			statement.executeQuery(query);
+			PreparedStatement prs = connection.prepareStatement("call add_new_user(?, ?, ?, ?, False);");
+
+			prs.setString(1,password);
+			prs.setString(2,Imie);
+			prs.setString(3,Nazwisko);
+			FileInputStream fin = new FileInputStream(filepath);
+			prs.setBlob(4,fin);
+
+			prs.executeQuery();
+			prs.close();
 			statement.close();
 			connection.close();
 		} catch (Exception e){
@@ -97,11 +109,15 @@ public class DatabaseComm {
 				userId = rs.getInt("id");
 				isAdmin = rs.getBoolean("is_admin");
 				String username = rs.getString("first_name") +" "+ rs.getString("last_name");
-				byte[] image = null;
-				//image = rs.getBytes("avatar");
-				//Image img = Toolkit.getDefaultToolkit().createImage(image);
-				//ImageIcon icon = new ImageIcon(img);
-				currentuser = new User(userId,username,new ImageIcon("src/textures/avatar.png"));
+				Image img;
+					try{
+						Blob blob = rs.getBlob("avatar");
+						InputStream in = blob.getBinaryStream();
+						img = ImageIO.read(in);
+					} catch (Exception e){
+						img = null;
+					}
+				currentuser = new User(userId,username,new ImageIcon(img));
 				statement.close();
 				connection.close();
 			} catch (Exception e){
@@ -149,8 +165,16 @@ public class DatabaseComm {
 			statement = connection.createStatement();
 			query = "SELECT * FROM users WHERE ID = " + id + ";";
 			ResultSet rs = statement.executeQuery(query);
-			rs.next(); ///todo icon, ale to generalnie trzeba zrobic sensowna zamiane blob na image
-			User user = new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), null);
+			rs.next();
+				Image img;
+				try{
+					Blob blob = rs.getBlob("avatar");
+					InputStream in = blob.getBinaryStream();
+					img = ImageIO.read(in);
+				} catch (Exception e){
+					img = null;
+				}
+			User user = new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), new ImageIcon(img));
 			statement.close();
 			connection.close();
 			return user;
@@ -233,7 +257,6 @@ public class DatabaseComm {
 			System.out.println("Wyslano reakcje do wiadomosci o id: " + msId + ". Id reakcji: " + typeOfReaction);
 		} catch (Exception exception){
 			exception.printStackTrace();
-			return;
 		}
 	}
 
@@ -278,6 +301,7 @@ public class DatabaseComm {
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
 				if(rs.getString("is_deleted").equals("yes")) continue;
+				if(rs.getInt("id")==userId) continue;
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
 				usersNames.add(user);
 			}
@@ -351,7 +375,7 @@ public class DatabaseComm {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
 			query = "SELECT user_id FROM moderators WHERE conversation_id = (SELECT id FROM conversations WHERE name = '" + chatName + "');";
-			ResultSet rs = statement.executeQuery(query); ///todo BUG - jak kliknie sie na konwersacje w ktorej jest sie modem to potem mozna dostac sie do panelu innych ktorych sie nie jest
+			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()){
 				if(rs.getInt("user_id")==userId) return true;
 			}
@@ -368,6 +392,7 @@ public class DatabaseComm {
 	public static ArrayList <Conversation> getUsersChat(){
 		ArrayList <Conversation> usersChats = new ArrayList<>();
 		ArrayList <Integer> conversationsIds = new ArrayList<>();
+		BufferedImage img = null;
 		try{
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
@@ -380,7 +405,14 @@ public class DatabaseComm {
 				query = "SELECT * FROM conversations WHERE ID = " + integer;
 				rs = statement.executeQuery(query);
 				rs.next();
-				usersChats.add(new Conversation(rs.getInt("id"),rs.getString("name"),null));
+				try{
+					Blob blob = rs.getBlob("avatar");
+					InputStream in = blob.getBinaryStream();
+					img = ImageIO.read(in);
+				} catch (Exception e){
+					img = null;
+				}
+				usersChats.add(new Conversation(rs.getInt("id"),rs.getString("name"),img));
 			}
 			statement.close();
 			connection.close();
@@ -425,20 +457,36 @@ public class DatabaseComm {
 		}
 	}
 
-	public static boolean addUserToChat(String  chatName,int userId){
-		System.out.println(userId);
-		boolean operationSuces = true;
-
-		return operationSuces;
+	public static boolean addUserToChat(String  chatName,int user_Id){
+		try{
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
+			statement = connection.createStatement();
+			query = "call add_user_by_id(" + user_Id + ", '" + chatName + "');";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception exception){
+			exception.printStackTrace();
+			return false;
+		}
 	}
 
-	public static boolean createChat(String  chatName, Image avatar,boolean invitationMode){
-
+	public static boolean createChat(String  chatName, String avatar,boolean invitationMode){
+		System.out.println(avatar);
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
-			statement = connection.createStatement(); ///TODO utworzyc parametr do ustawiania opcji zaproszenia i konwersje image na blob
-			query = "call new_conversation('" + chatName +"'," + 0 + "," + null + ");";
-			statement.executeQuery(query);
+			statement = connection.createStatement();
+
+			PreparedStatement prs = connection.prepareStatement("call new_conversation(?, ?, ?);");
+			prs.setString(1,chatName);
+			prs.setBoolean(2,invitationMode);
+			FileInputStream fin = new FileInputStream(avatar);
+
+			prs.setBlob(3,fin);
+			prs.executeQuery();
+			prs.close();
+
 			statement.close();
 			connection.close();
 			return true;
@@ -448,19 +496,40 @@ public class DatabaseComm {
 		}
 	}
 	//dodaje uztykownikow z listy id do chatu
-	public static boolean addUserListToChat(String  chatName,ArrayList<Integer> usersID){///todo zmiana arraylisty na int
-		System.out.println(usersID.get(0));
-		boolean operationSuces = true;
-
-		return operationSuces;
+	public static boolean addUserListToChat(String  chatName,ArrayList<Integer> usersID){
+		try {
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
+			statement = connection.createStatement();
+			for(Integer user : usersID){
+				query = "call add_user_by_id(" + user + ", '" + chatName + "');";
+				statement.executeQuery(query);
+			}
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	//dodaje moderatorow z listy id do modow chatu
 	public static boolean addModeratorListToChat(String  chatName, ArrayList<Integer> usersID){//TODO Zabezpieczenie co jeżeli puste
-		System.out.println(usersID.get(0));
-		boolean operationSuces = true;
-
-		return operationSuces;
+		if(usersID.isEmpty()) return false;
+		try {
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
+			statement = connection.createStatement();
+			for(Integer user : usersID){
+				query = "call add_moderator_by_id(" + user + ", '" + chatName + "');";
+				statement.executeQuery(query);
+			}
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	//Musi sprawdzić czy użytkownik Nie jestModeratorem ///todo - nie ma procedury na usuwanie przez moderatora, istnieje tylko wywalenie samego siebie
@@ -481,8 +550,7 @@ public class DatabaseComm {
 	}
 
 	//Obniża swoje uprawnienia
-	public static boolean downModeratorPermision(String  chatName, int userId){ ///todo zrobic id zamiast name
-		System.out.println(userId);
+	public static boolean downModeratorPermision(String  chatName, int userId){ ///todo obnizenie? obnizenie kogos? (linia 535)
 		try{
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
@@ -497,14 +565,23 @@ public class DatabaseComm {
 		}
 	}
 
+	//podnosi uprawnienia uzytkownika
 	public static boolean upModeratorPermision(String  chatName, int userId){
-		System.out.println(userId);
-		boolean operationSuces = true;
-
-		return operationSuces;
+		try{
+			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
+			statement = connection.createStatement();
+			query = "call add_moderator_by_id(" + userId +", '" + chatName + "');";
+			statement.executeQuery(query);
+			statement.close();
+			connection.close();
+			return true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
-	public static boolean removeModeratorFromChat(String  chatName, int user_id){
+	public static boolean removeModeratorFromChat(String  chatName, int user_id){ ///todo usuniecie z czatu?
 		System.out.println(user_id);
 		try{
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);

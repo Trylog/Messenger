@@ -54,6 +54,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 	private Image scaledImage;
 	private JToggleButton invitationtoggleButton;
 	private JLabel autoInvitationLabel;
+	private String filePath = "";
 
 	CreateChatGUI() {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -465,9 +466,13 @@ class CreateChatGUI extends JFrame implements ActionListener {
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
+
 		if (e.getSource() == chooseAvatarButton) {
 			JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			int result = fileChooser.showOpenDialog(this);
+			File file = fileChooser.getSelectedFile(); // Scieżka do utworzenia avatara
+			filePath = file.getPath();
 			if (result == JFileChooser.APPROVE_OPTION) {
 				File selectedFile = fileChooser.getSelectedFile();
 				ImageIcon originalIcon = new ImageIcon(selectedFile.getAbsolutePath());
@@ -525,7 +530,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			}else {
 				invitation = false;
 			}
-			createChat(chatNameTextField.getText(),scaledImage,invitation);
+			createChat(chatNameTextField.getText(),filePath,invitation);
 			ArrayList<Integer> addedUsersID = new ArrayList<>(addedUsers);
 			addUserListToChat(chatNameTextField.getText(),addedUsersID);
 			ArrayList<Integer> addedModeratorsID = new ArrayList<>(addedModerators);
