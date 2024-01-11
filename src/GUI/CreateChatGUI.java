@@ -1,5 +1,7 @@
 package GUI;
 
+import Main.DatabaseComm;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -12,6 +14,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
+import static GUI.MainGUI.refreshAllConversationsList;
 import static Main.DatabaseComm.*;
 
 class CreateChatGUI extends JFrame implements ActionListener {
@@ -33,22 +36,25 @@ class CreateChatGUI extends JFrame implements ActionListener {
 	private JTextField chatUrserSearchField;
 	private ButtonGroup chatUserButtonGroup;
 	private JPanel chatUserInfoTextPanle;
-	private JTextArea chatUserInfoTextArea;
+	private SpecialTextArea chatUserInfoTextArea;
 
 	private JScrollPane portalUserScrollPane;
 	private JPanel portalUserListPanel;
 	private JTextField portalUrserSearchField;
 	private ButtonGroup portalUserButtonGroup;
 	private JPanel portalUserInfoTextPanle;
-	private JTextArea portalUserInfoTextArea;
+	private SpecialTextArea portalUserInfoTextArea;
 
 	private JScrollPane chatModeratorScrollPane;
 	private JPanel chatModeratorListPanel;
 	private JTextField chatModeratorSearchField;
 	private ButtonGroup chatModeratorButtonGroup;
 	private JPanel chatModeratorInfoTextPanle;
-	private JTextArea chatModeratorInfoTextArea;
+	private SpecialTextArea chatModeratorInfoTextArea;
 	private Image scaledImage;
+	private JToggleButton invitationtoggleButton;
+	private JLabel autoInvitationLabel;
+	private String filePath = "";
 
 	CreateChatGUI() {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -95,9 +101,20 @@ class CreateChatGUI extends JFrame implements ActionListener {
 
 		// Przycisk do zatwierdzenia podstawowych danych
 		createChatButton = new JButton("Utwórz");
-		createChatButton.setBounds(border + 595,  border + 5, 300, 125);
+		createChatButton.setBounds(border + 595,  border + 5, 300, 100);
 		createChatButton.addActionListener(this);
 		this.add(createChatButton);
+
+		//Label trybu zapraszania
+		autoInvitationLabel = new JLabel("Automatyczne zapraszanie:");
+		autoInvitationLabel.setBounds(border +630,  border + 105, 200, 25);
+		this.add(autoInvitationLabel);
+
+		//Przełącznik trybu zapraszania
+		invitationtoggleButton = new JToggleButton("OFF");
+		invitationtoggleButton.setBounds(border + 795,  border + 105, 100, 25);
+		invitationtoggleButton.addActionListener(this);
+		this.add(invitationtoggleButton);
 
 		// Panel z przewijaniem dla użytkowników czatu
 		chatUserScrollPane = new JScrollPane();
@@ -116,7 +133,6 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		chatModeratorScrollPane.setBorder(BorderFactory.createTitledBorder("Lista Moderatorów Czatu"));
 		chatModeratorScrollPane.setBounds(border+600, border+140, 300, 200);
 		chatModeratorScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
 
 		// Panel z komponentami użytkowników czatu(dodaj swoje komponenty)
 		chatUserListPanel = new JPanel();
@@ -142,21 +158,10 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		// Grupa dla przycisków moderatora czatu
 		chatModeratorButtonGroup = new ButtonGroup();
 
-		// Przykładowe dodanie kilku użytkowników czatu - Do usuniecia
-			/*for (int i = 0; i < 20; i++) {
-				JToggleButton chatUserButton = new JToggleButton("Użytkownik " + i);
-				chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-				Dimension buttonSize = new Dimension(270, 30);
-				chatUserButton.setPreferredSize(buttonSize);
-				chatUserButton.setMaximumSize(buttonSize);
-				chatUserButton.addActionListener(new ChatUserButtonListener());
-				chatUserListPanel.add(chatUserButton);
-				chatUserButtonGroup.add(chatUserButton);
-			}*/
-
-		// Przykładowe dodanie kilku użytkowników portalu
-		for (int i = 0; i < 20; i++) {
-			JToggleButton portalUserButton = new JToggleButton("Użytkownik " + i);
+		// Dodawanie użytkowników
+		ArrayList <DatabaseComm.User> users = getPortalUsersNames();
+		for (int i = 0; i < users.size(); i++) {
+			UsersToggleButton portalUserButton = new UsersToggleButton(users.get(i).id,users.get(i).username,null);
 			portalUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
 			Dimension buttonSize = new Dimension(270, 30);
 			portalUserButton.setPreferredSize(buttonSize);
@@ -165,18 +170,6 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			portalUserListPanel.add(portalUserButton);
 			portalUserButtonGroup.add(portalUserButton);
 		}
-
-		// Przykładowe dodanie kilku użytkowników portalu Do usunięcia
-			/*for (int i = 0; i < 20; i++) {
-				JToggleButton chatModeratorButton = new JToggleButton("Użytkownik " + i);
-				chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-				Dimension buttonSize = new Dimension(270, 30);
-				chatModeratorButton.setPreferredSize(buttonSize);
-				chatModeratorButton.setMaximumSize(buttonSize);
-				chatModeratorButton.addActionListener(new ChatModeratorButtonListener());
-				chatModeratorListPanel.add(chatModeratorButton);
-				chatModeratorButtonGroup.add(chatModeratorButton);
-			}*/
 
 		// Panel z wyszukiwaniem użytkowników czatu
 		JPanel chatUserSearchPanel = new JPanel();
@@ -259,14 +252,14 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		this.add(chatModeratorSearchPanel);
 
 		// Pole tekstowe z informacjami o wybranym użytkowniku czatu
-		chatUserInfoTextArea = new JTextArea();
+		chatUserInfoTextArea = new SpecialTextArea();
 		chatUserInfoTextPanle = createInfoTextArea(10 + 300,border + 400, "Wybrany użytkownik", 300, 60, chatUserInfoTextArea);
 
 		// Pole tekstowe z informacjami o wybranym użytkowniku portalu
-		portalUserInfoTextArea = new JTextArea();
+		portalUserInfoTextArea = new SpecialTextArea();
 		portalUserInfoTextPanle = createInfoTextArea(10,border + 400, "Wybrany użytkownik", 300, 60, portalUserInfoTextArea);
 
-		chatModeratorInfoTextArea = new JTextArea();
+		chatModeratorInfoTextArea = new SpecialTextArea();
 		chatModeratorInfoTextPanle = createInfoTextArea(10 + 600,border + 400, "Wybrany użytkownik", 300, 60, chatModeratorInfoTextArea);
 
 		addUserToChat = new JButton("Dodaj użytkownika do czatu");
@@ -290,8 +283,8 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		Component[] components = chatUserListPanel.getComponents();
 
 		for (Component component : components) {
-			if (component instanceof JToggleButton) {
-				JToggleButton chatUserButton = (JToggleButton) component;
+			if (component instanceof UsersToggleButton) {
+				UsersToggleButton chatUserButton = (UsersToggleButton) component;
 				String buttonText = chatUserButton.getText().toLowerCase();
 				chatUserButton.setVisible(buttonText.contains(searchPhrase));
 			}
@@ -304,8 +297,8 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		Component[] components = portalUserListPanel.getComponents();
 
 		for (Component component : components) {
-			if (component instanceof JToggleButton) {
-				JToggleButton portalUserButton = (JToggleButton) component;
+			if (component instanceof UsersToggleButton) {
+				UsersToggleButton portalUserButton = (UsersToggleButton) component;
 				String buttonText = portalUserButton.getText().toLowerCase();
 				portalUserButton.setVisible(buttonText.contains(searchPhrase));
 			}
@@ -319,8 +312,8 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		Component[] components = chatModeratorListPanel.getComponents();
 
 		for (Component component : components) {
-			if (component instanceof JToggleButton) {
-				JToggleButton chatModeratorButton = (JToggleButton) component;
+			if (component instanceof UsersToggleButton) {
+				UsersToggleButton chatModeratorButton = (UsersToggleButton) component;
 				String buttonText = chatModeratorButton.getText().toLowerCase();
 				chatModeratorButton.setVisible(buttonText.contains(searchPhrase));
 			}
@@ -328,78 +321,91 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		chatModeratorListPanel.revalidate();
 		chatModeratorListPanel.repaint();
 	}
-	 private Set<String> addedUsers = new HashSet<>();
-	 private void addUserToChat() {
-		 String userName = portalUserInfoTextArea.getText();
+	private Set<Integer> addedUsers = new HashSet<>();  // Zbiór przechowujący identyfikatory dodanych użytkowników
 
-		 if (userName.equals("")) {
-			 JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
-		 } else if (addedUsers.contains(userName)) {
-			 JOptionPane.showMessageDialog(null, "Ten użytkownik został już dodany do czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
-		 } else {
-			 JToggleButton chatUserButton = new JToggleButton(userName);
-			 chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-			 Dimension buttonSize = new Dimension(270, 30);
-			 chatUserButton.setPreferredSize(buttonSize);
-			 chatUserButton.setMaximumSize(buttonSize);
-			 chatUserButton.addActionListener(new CreateChatGUI.ChatUserButtonListener());
-			 chatUserListPanel.add(chatUserButton);
-			 chatUserButtonGroup.add(chatUserButton);
+	private void addUserToChat() {
+		String userName = portalUserInfoTextArea.getText();
+		int userId = portalUserInfoTextArea.id;
 
-			 // Dodanie użytkownika do zbioru
-			 addedUsers.add(userName);
+		if (userName.equals("")) {
+			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+		} else if (addedUsers.contains(userId)) {
+			JOptionPane.showMessageDialog(null, "Ten użytkownik został już dodany do czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
+		} else {
+			UsersToggleButton chatUserButton = new UsersToggleButton(userId, userName, null);
+			chatUserButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+			Dimension buttonSize = new Dimension(270, 30);
+			chatUserButton.setPreferredSize(buttonSize);
+			chatUserButton.setMaximumSize(buttonSize);
+			chatUserButton.addActionListener(new CreateChatGUI.ChatUserButtonListener());
+			chatUserListPanel.add(chatUserButton);
+			chatUserButtonGroup.add(chatUserButton);
 
-			 chatUserListPanel.revalidate();
-			 chatUserListPanel.repaint();
-		 }
-	 }
+			// Dodanie identyfikatora użytkownika do zbioru
+			addedUsers.add(userId);
+
+			chatUserListPanel.revalidate();
+			chatUserListPanel.repaint();
+		}
+	}
+
 	private void removeUserFromChat() {
 		String userNameToRemove = chatUserInfoTextArea.getText();
+		int userId = chatUserInfoTextArea.id;
 
 		if (userNameToRemove.equals("")) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		} else {
-			// Szukanie przycisku odpowiadającego użytkownikowi
-			JToggleButton buttonToRemove = findUserButtonToRemoveUserFromChat(userNameToRemove);
+			// Sprawdzenie, czy użytkownik jest dodany do czatu
+			if (addedUsers.contains(userId)) {
+				// Szukanie przycisku odpowiadającego użytkownikowi
+				JToggleButton buttonToRemove = findUserButtonToRemoveUserFromChat(userNameToRemove);
 
-			if (buttonToRemove != null) {
-				// Usunięcie przycisku z panelu i grupy przycisków
-				chatUserListPanel.remove(buttonToRemove);
-				chatUserButtonGroup.remove(buttonToRemove);
-				addedUsers.remove(userNameToRemove);
+				if (buttonToRemove != null) {
+					// Usunięcie przycisku z panelu i grupy przycisków
+					chatUserListPanel.remove(buttonToRemove);
+					chatUserButtonGroup.remove(buttonToRemove);
 
-				chatUserInfoTextArea.setText("");
+					// Usunięcie identyfikatora użytkownika ze zbioru
+					addedUsers.remove(userId);
 
-				// Odświeżenie widoku
-				chatUserListPanel.revalidate();
-				chatUserListPanel.repaint();
+					chatUserInfoTextArea.setText("");
+
+					// Odświeżenie widoku
+					chatUserListPanel.revalidate();
+					chatUserListPanel.repaint();
+				} else {
+					JOptionPane.showMessageDialog(null, "Nie znaleziono użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				}
+				downModeratorPermissionToUser(userNameToRemove, userId, true);
 			} else {
-				JOptionPane.showMessageDialog(null, "Nie znaleziono użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Ten użytkownik nie jest dodany do czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}
-			downModeratorPermissionToUser(userNameToRemove,true);
 		}
 	}
 	// Metoda pomocnicza do znalezienia przycisku odpowiadającego użytkownikowi
 	private JToggleButton findUserButtonToRemoveUserFromChat(String userName) {
 		for (Enumeration<AbstractButton> buttons = chatUserButtonGroup.getElements(); buttons.hasMoreElements();) {
-			JToggleButton button = (JToggleButton) buttons.nextElement();
+			UsersToggleButton button = (UsersToggleButton) buttons.nextElement();
 			if (button.getText().equals(userName)) {
 				return button;
 			}
 		}
 		return null;
 	}
-	private Set<String> addedModerators = new HashSet<>();
+
+	private Set<Integer> addedModerators = new HashSet<>();  // Zbiór przechowujący identyfikatory dodanych moderatorów
 
 	private void upUserPermissionToModerator() {
 		String userName = chatUserInfoTextArea.getText();
+		int userId = chatUserInfoTextArea.id;
 
 		if (userName.equals("")) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
-		} else if (addedModerators.contains(userName)) {
+		} else if (addedModerators.contains(userId)) {
 			JOptionPane.showMessageDialog(null, "Ten użytkownik został już dodany jako moderator.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		} else {
-			JToggleButton chatModeratorButton = new JToggleButton(userName);
+			UsersToggleButton chatModeratorButton = new UsersToggleButton(userId, userName, null);
 			chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 			Dimension buttonSize = new Dimension(270, 30);
 			chatModeratorButton.setPreferredSize(buttonSize);
@@ -408,42 +414,50 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			chatModeratorListPanel.add(chatModeratorButton);
 			chatModeratorButtonGroup.add(chatModeratorButton);
 
-			// Dodanie moderatora do zbioru
-			addedModerators.add(userName);
+			// Dodanie identyfikatora moderatora do zbioru
+			addedModerators.add(userId);
 
 			chatModeratorListPanel.revalidate();
 			chatModeratorListPanel.repaint();
 		}
 	}
-	private void downModeratorPermissionToUser(String userNameToRemove, boolean extraRemove){
+
+	private void downModeratorPermissionToUser(String userNameToRemove, int userId, boolean extraRemove) {
 		if (userNameToRemove.equals("")) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		} else {
-			// Szukanie przycisku odpowiadającego użytkownikowi
-			JToggleButton buttonToRemove = findUserButtonToDownModeratorPermissionToUser(userNameToRemove);
+			// Sprawdzenie, czy użytkownik jest dodany jako moderator
+			if (addedModerators.contains(userId)) {
+				// Szukanie przycisku odpowiadającego użytkownikowi
+				JToggleButton buttonToRemove = findUserButtonToDownModeratorPermissionToUser(userNameToRemove);
 
-			if (buttonToRemove != null) {
-				// Usunięcie przycisku z panelu i grupy przycisków
-				chatModeratorListPanel.remove(buttonToRemove);
-				chatModeratorButtonGroup.remove(buttonToRemove);
-				addedModerators.remove(userNameToRemove);
+				if (buttonToRemove != null) {
+					// Usunięcie przycisku z panelu i grupy przycisków
+					chatModeratorListPanel.remove(buttonToRemove);
+					chatModeratorButtonGroup.remove(buttonToRemove);
 
-				chatModeratorInfoTextArea.setText("");
+					// Usunięcie identyfikatora moderatora ze zbioru
+					addedModerators.remove(userId);
 
-				// Odświeżenie widoku
-				chatModeratorListPanel.revalidate();
-				chatModeratorListPanel.repaint();
-			} else {
-				if(!extraRemove){
-					JOptionPane.showMessageDialog(null, "Nie znaleziono użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
+					chatModeratorInfoTextArea.setText("");
+
+					// Odświeżenie widoku
+					chatModeratorListPanel.revalidate();
+					chatModeratorListPanel.repaint();
+				} else {
+					if (!extraRemove) {
+						JOptionPane.showMessageDialog(null, "Nie znaleziono użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
+					}
 				}
+			} else {
+				JOptionPane.showMessageDialog(null, "Ten użytkownik nie jest dodany jako moderator.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 	// Metoda pomocnicza do znalezienia przycisku odpowiadającego użytkownikowi
 	private JToggleButton findUserButtonToDownModeratorPermissionToUser(String userName) {
 		for (Enumeration<AbstractButton> buttons = chatModeratorButtonGroup.getElements(); buttons.hasMoreElements();) {
-			JToggleButton button = (JToggleButton) buttons.nextElement();
+			UsersToggleButton button = (UsersToggleButton) buttons.nextElement();
 			if (button.getText().equals(userName)) {
 				return button;
 			}
@@ -452,9 +466,13 @@ class CreateChatGUI extends JFrame implements ActionListener {
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
+
 		if (e.getSource() == chooseAvatarButton) {
 			JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES); ///todo tylko grafika do wyboru ::Kamil/Michał
 			int result = fileChooser.showOpenDialog(this);
+			File file = fileChooser.getSelectedFile(); // Scieżka do utworzenia avatara
+			filePath = file.getPath();
 			if (result == JFileChooser.APPROVE_OPTION) {
 				File selectedFile = fileChooser.getSelectedFile();
 				ImageIcon originalIcon = new ImageIcon(selectedFile.getAbsolutePath());
@@ -503,14 +521,32 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			upUserPermissionToModerator();
 		}
 		if (e.getSource() == downModeratorPermissionToUser) {
-			downModeratorPermissionToUser(chatModeratorInfoTextArea.getText(),false);
+			downModeratorPermissionToUser(chatModeratorInfoTextArea.getText(),chatModeratorInfoTextArea.id,false);
 		}
 		if (e.getSource() == createChatButton) {
-			createChat(chatNameTextField.getText(),scaledImage);
-			ArrayList<String> addedUsersList = new ArrayList<>(addedUsers);
-			addUserListToChat(chatNameTextField.getText(),addedUsersList);
-			ArrayList<String> addedModeratorsList = new ArrayList<>(addedModerators);
-			addModeratorListToChat(chatNameTextField.getText(),addedModeratorsList);
+			boolean invitation;
+			if(invitationtoggleButton.getText().equals("ON")){
+				invitation = true;
+			}else {
+				invitation = false;
+			}
+			createChat(chatNameTextField.getText(),filePath,invitation);
+			ArrayList<Integer> addedUsersID = new ArrayList<>(addedUsers);
+			addUserListToChat(chatNameTextField.getText(),addedUsersID);
+			ArrayList<Integer> addedModeratorsID = new ArrayList<>(addedModerators);
+			addModeratorListToChat(chatNameTextField.getText(),addedModeratorsID);
+			refreshAllConversationsList();
+			dispose();
+		}
+		if (e.getSource() == invitationtoggleButton) {
+			// Zmiana tekstu w zależności od stanu przełącznika
+			if (invitationtoggleButton.isSelected()) {
+				invitationtoggleButton.setText("ON");
+				// Wykonaj dodatkowe działania, gdy przełącznik jest w stanie ON
+			} else {
+				invitationtoggleButton.setText("OFF");
+				// Wykonaj dodatkowe działania, gdy przełącznik jest w stanie OFF
+			}
 		}
 	}
 
@@ -519,8 +555,9 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// Możesz dodać tu kod obsługi zdarzenia dla wybranego użytkownika
 			// W tej chwili zaznaczony przycisk można sprawdzić używając:
-			JToggleButton chatUserButton = (JToggleButton) e.getSource();
+			UsersToggleButton chatUserButton = (UsersToggleButton) e.getSource();
 			chatUserInfoTextArea.setText(chatUserButton.getText());
+			chatUserInfoTextArea.id = chatUserButton.id;
 		}
 	}
 	private class PortalUserButtonListener implements ActionListener {
@@ -528,8 +565,9 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// Możesz dodać tu kod obsługi zdarzenia dla wybranego użytkownika
 			// W tej chwili zaznaczony przycisk można sprawdzić używając:
-			JToggleButton portalUserButton = (JToggleButton) e.getSource();
+			UsersToggleButton portalUserButton = (UsersToggleButton) e.getSource();
 			portalUserInfoTextArea.setText(portalUserButton.getText());
+			portalUserInfoTextArea.id = portalUserButton.id;
 		}
 	}
 	private class ChatModeratorButtonListener implements ActionListener {
@@ -537,8 +575,9 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// Możesz dodać tu kod obsługi zdarzenia dla wybranego użytkownika
 			// W tej chwili zaznaczony przycisk można sprawdzić używając:
-			JToggleButton chatModeratorButton = (JToggleButton) e.getSource();
+			UsersToggleButton chatModeratorButton = (UsersToggleButton) e.getSource();
 			chatModeratorInfoTextArea.setText(chatModeratorButton.getText());
+			chatModeratorInfoTextArea.id = chatModeratorButton.id;
 		}
 	}
 	private JPanel createInfoTextArea(int x, int y, String title, int width, int height, JTextArea infoTextArea ) {
@@ -563,5 +602,22 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		button.setBounds(x,y,width,height);
 		button.addActionListener(this);
 		this.add(button);
+	}
+
+	private class UsersToggleButton extends JToggleButton {
+		int id;
+		String name;
+		Icon avatar;
+		UsersToggleButton(int id,String name,Icon avatar){
+			this.id = id;
+			this.name = name;
+			this.avatar = avatar;
+			setText(name);
+		}
+	}
+
+	private class SpecialTextArea extends JTextArea {
+		public int id;
+		public String text;
 	}
 }

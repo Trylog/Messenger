@@ -33,6 +33,8 @@ public class MainGUI extends JFrame implements ActionListener {
 	public static Image icon;
 	public static JPanel mContentPanel;
 
+	static JPanel cContentPanel;
+
 	MainGUI(){
 
 		messagesPanel = new JScrollPane();
@@ -57,7 +59,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
 		messagesPanel.setViewportView(mContentPanel);
 
-		var messages = Main.databaseComm.getMessages();
+		var messages = Main.databaseComm.getMessages();//TODO Brak początkowo wiadomości
 
 		for(var message : messages){
 			MessagesListElement element = new MessagesListElement(message);
@@ -83,7 +85,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		scrollPane.setBounds(0, 0, 300, 610 - (4 * border));
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-		JPanel cContentPanel = new JPanel();
+		cContentPanel = new JPanel();
 		cContentPanel.setLayout(new BoxLayout(cContentPanel, BoxLayout.Y_AXIS));
 
 		scrollPane.setViewportView(cContentPanel);
@@ -121,7 +123,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		createChatButtonPanel.setBounds(0, 610 - (4 * border), 150, 40);
 		this.add(createChatButtonPanel);
 
-		createChatButtonMenu = new JButton("Stwóż nowy czat");
+		createChatButtonMenu = new JButton("Stwórz nowy czat");
 		createChatButtonMenu.setPreferredSize(new Dimension(150, 30));
 		createChatButtonMenu.setHorizontalAlignment(SwingConstants.CENTER);
 		createChatButtonMenu.setVerticalAlignment(SwingConstants.CENTER);
@@ -154,6 +156,8 @@ public class MainGUI extends JFrame implements ActionListener {
 		this.add(newMessagePane);
 		this.add(sendButton);
 
+		currentConversationName = new String("");
+
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -169,20 +173,38 @@ public class MainGUI extends JFrame implements ActionListener {
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Panel Mod");
 			ModeratorPanelFrame moderatorPanelFrame = new ModeratorPanelFrame(currentConversationName);
+			refreshAllConversationsList();
+			currentConversationName = "";
 		}
 		if(e.getSource() == createChatButtonMenu){
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("PStwórz czat");
 			CreateChatGUI createChatGUI = new CreateChatGUI();
-			//TODO Odświeżenie Listy Konwersacji
+			currentConversationName = "";
 		}
 		if(e.getSource() == joinChatButtonButtonMenu){
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Dołącz do konwersacji");
 			JoinChatGUI joinChatGUI = new JoinChatGUI();
-			//TODO Odświeżenie Listy Konwersacji
+			currentConversationName = "";
 		}
 	}
+
+	private static void removeAllConversations() {
+		cContentPanel.removeAll();
+		cContentPanel.revalidate();
+		cContentPanel.repaint();
+	}
+
+	public static void refreshAllConversationsList() {
+		removeAllConversations();
+		ArrayList <Conversation> chats  = getUsersChat();
+		for(int i=0;i<chats.size();i++){
+			conversationListPanelElement element = new conversationListPanelElement(chats.get(i));
+			cContentPanel.add(element);
+		}
+	}
+
 	private static class MessagesListElement extends JPanel{
 
 		private static MessagesListElement currentRedLabel;
@@ -200,7 +222,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			JPanel messagePanel = new JPanel();
 			messagePanel.setLayout(new BorderLayout());
 
-			DatabaseComm.User user = Main.databaseComm.getUser(messageData.senderId);
+			DatabaseComm.User user = Main.databaseComm.getUser(messageData.senderId); ///todo reakcja na null (jakby sie bugowalo)
 			JLabel iconLabel = new JLabel(user.icon);
 			this.add(iconLabel);
 
@@ -259,7 +281,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			react.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					System.out.println("reakcja"); //TODO menu reakcji
+					System.out.println("reakcja");
 					EmojiChooser emojiChooser = new EmojiChooser(messageData.id);
 				}
 			});
@@ -269,9 +291,8 @@ public class MainGUI extends JFrame implements ActionListener {
 	private static class conversationListPanelElement extends JPanel {
 		JLabel chatName;
 
-		conversationListPanelElement(Conversation conversation) { //TODO wejściem powinien być obiekt zawierający wszystkie dane o konwersacji
+		conversationListPanelElement(Conversation conversation) {
 			String name = conversation.name;
-			MainGUI.currentConversationName = name;
 			AvatarPanel graphicsPanel = new AvatarPanel(conversation.avatar);
 			chatName = new JLabel(name);
 
@@ -294,12 +315,14 @@ public class MainGUI extends JFrame implements ActionListener {
 					// Po kliknięciu wypisz nazwę konwersacji w konsoli
 					System.out.println("Kliknięto konwersację: " + name);
 					MainGUI.messagesPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
-					MainGUI.displayedConversationId = conversation.id; //TODO zapisywane powinno być faktyczne id konwersacji
+					MainGUI.displayedConversationId = conversation.id;
 					if(getModeratorChatIs(name)){
 						moderatorButtonMenu.setEnabled(true);
+					}else{
+						moderatorButtonMenu.setEnabled(false);
 					}
-					//GUI.MainGUI.messangesPanel.revalidate(); //TODO odświeżanie zawartości messagesPanel
-					//GUI.MainGUI.messangesPanel.repaint();
+					currentConversationName = name;
+
 				}
 			});
 		}

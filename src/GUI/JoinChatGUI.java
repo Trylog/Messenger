@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import Main.*;
 
+import static GUI.MainGUI.refreshAllConversationsList;
 import static Main.DatabaseComm.*;
 
 class JoinChatGUI extends JFrame implements ActionListener {
@@ -50,16 +51,20 @@ class JoinChatGUI extends JFrame implements ActionListener {
 		chatButtonGroup = new ButtonGroup();
 
 		// Dodajmy elementów do listy czatów
-		ArrayList <Conversation> chats  = getUsersChat();
-		for (int i = 0; i < chats.size(); i++) {
-			JToggleButton chatButton = new JToggleButton(chats.get(i).name);
-			chatButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(390, 30);
-			chatButton.setPreferredSize(buttonSize);
-			chatButton.setMaximumSize(buttonSize);
-			chatButton.addActionListener(new JoinChatGUI.ChatButtonListener());
-			chatListPanel.add(chatButton);
-			chatButtonGroup.add(chatButton);
+		ArrayList <Conversation> chats  = getAllChats(); ///todo getAllChatsWithoutUser(int userid) ::Kamil/Jacob
+		if(chats != null){
+			for (int i = 0; i < chats.size(); i++) {
+				JToggleButton chatButton = new JToggleButton(chats.get(i).name);
+				chatButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
+				Dimension buttonSize = new Dimension(390, 30);
+				chatButton.setPreferredSize(buttonSize);
+				chatButton.setMaximumSize(buttonSize);
+				chatButton.addActionListener(new JoinChatGUI.ChatButtonListener());
+				chatListPanel.add(chatButton);
+				chatButtonGroup.add(chatButton);
+			}
+		}else{
+			JOptionPane.showMessageDialog(null, "Błąd wczytywania czatów.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		}
 
 		// Panel z wyszukiwaniem czatów
@@ -144,6 +149,7 @@ class JoinChatGUI extends JFrame implements ActionListener {
 				if(!(addUserToChat(chatInfoTextArea.getText()))){
 					JOptionPane.showMessageDialog(null, "Nie Udało się dodać użytkownika", "Błąd", JOptionPane.ERROR_MESSAGE);
 				}
+				refreshAllConversationsList();
 				dispose();
 			}
 		}
