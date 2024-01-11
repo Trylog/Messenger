@@ -469,7 +469,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 
 		if (e.getSource() == chooseAvatarButton) {
 			JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES); ///todo tylko grafika do wyboru ::Kamil/Michał
 			int result = fileChooser.showOpenDialog(this);
 			File file = fileChooser.getSelectedFile(); // Scieżka do utworzenia avatara
 			filePath = file.getPath();

@@ -222,7 +222,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			JPanel messagePanel = new JPanel();
 			messagePanel.setLayout(new BorderLayout());
 
-			DatabaseComm.User user = Main.databaseComm.getUser(messageData.senderId); ///todo reakcja na null
+			DatabaseComm.User user = Main.databaseComm.getUser(messageData.senderId); ///todo reakcja na null (jakby sie bugowalo)
 			JLabel iconLabel = new JLabel(user.icon);
 			this.add(iconLabel);
 
@@ -281,7 +281,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			react.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					System.out.println("reakcja"); //TODO menu reakcji
+					System.out.println("reakcja");
 					EmojiChooser emojiChooser = new EmojiChooser(messageData.id);
 				}
 			});

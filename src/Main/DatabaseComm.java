@@ -117,7 +117,12 @@ public class DatabaseComm {
 					} catch (Exception e){
 						img = null;
 					}
-				currentuser = new User(userId,username,new ImageIcon(img));
+				try{
+					currentuser = new User(userId,username,new ImageIcon(img));
+				} catch (Exception e){
+					e.printStackTrace();
+					currentuser = new User(userId,username,null);
+				}
 				statement.close();
 				connection.close();
 			} catch (Exception e){
@@ -160,6 +165,7 @@ public class DatabaseComm {
 	}
 
 	public User getUser(int id){
+		User user;
 		try{
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
@@ -174,7 +180,11 @@ public class DatabaseComm {
 				} catch (Exception e){
 					img = null;
 				}
-			User user = new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), new ImageIcon(img));
+			try {
+				user = new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), new ImageIcon(img));
+			} catch (Exception e){
+				user = new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), null);
+			}
 			statement.close();
 			connection.close();
 			return user;
@@ -325,7 +335,7 @@ public class DatabaseComm {
 			query = "select * from users where id in (select user_id from conversation_members where conversation_id = (select id from conversations where name = '" + chatName + "'))";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
-				if(rs.getString("is_deleted").equals("yes")) continue; ///todo icon
+				if(rs.getString("is_deleted").equals("yes")) continue; // bez avatarow, wystarcza same nazwy
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
 				usersNames.add(user);
 			}
@@ -341,7 +351,7 @@ public class DatabaseComm {
 
 	//Nie podaje samego siebie
 	//ModeratorzyDanegoCzatu
-	public static ArrayList <User> getChatModeratorsNames(String chatName){//TODO Funkcja nie zwraca moderatorów Sprawdzić poprawność działania
+	public static ArrayList <User> getChatModeratorsNames(String chatName){
 		ArrayList <User> usersNames = new ArrayList<>();
 
 		try{
@@ -350,7 +360,7 @@ public class DatabaseComm {
 			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = '" + chatName + "'))";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
-				if(rs.getString("is_deleted").equals("yes")) continue;
+				if(rs.getString("is_deleted").equals("yes")) continue; // bez avatarow, wystarcza same nazwy
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
 				usersNames.add(user);
 			}
@@ -425,7 +435,7 @@ public class DatabaseComm {
 	}
 
 	//Wszystkie istniejące czaty
-	public static ArrayList <Conversation> getAllChats(){ ///todo wywalic te w ktorych jest user, dodac userid
+	public static ArrayList <Conversation> getAllChats(){ ///todo wywalic te w ktorych jest user, dodac userid  ::Jacob
 		ArrayList<Conversation> allChats = new ArrayList<>();
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
@@ -514,7 +524,7 @@ public class DatabaseComm {
 	}
 
 	//dodaje moderatorow z listy id do modow chatu
-	public static boolean addModeratorListToChat(String  chatName, ArrayList<Integer> usersID){//TODO Zabezpieczenie co jeżeli puste
+	public static boolean addModeratorListToChat(String  chatName, ArrayList<Integer> usersID){
 		if(usersID.isEmpty()) return false;
 		try {
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
@@ -532,7 +542,7 @@ public class DatabaseComm {
 		}
 	}
 
-	//Musi sprawdzić czy użytkownik Nie jestModeratorem ///todo - nie ma procedury na usuwanie przez moderatora, istnieje tylko wywalenie samego siebie
+	//Musi sprawdzić czy użytkownik Nie jestModeratorem ///todo - nie ma procedury na usuwanie przez moderatora, istnieje tylko wywalenie samego siebie ::Jacob
 	public static boolean removeUserFromChat(String  chatName,int userId){
 		System.out.println(userId);
 		try{
@@ -550,7 +560,7 @@ public class DatabaseComm {
 	}
 
 	//Obniża swoje uprawnienia
-	public static boolean downModeratorPermision(String  chatName, int userId){ ///todo obnizenie? obnizenie kogos? (linia 535)
+	public static boolean downModeratorPermision(String  chatName, int userId){ ///todo delete_moderator_by_moderator ::Jacob
 		try{
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
@@ -581,7 +591,7 @@ public class DatabaseComm {
 		}
 	}
 
-	public static boolean removeModeratorFromChat(String  chatName, int user_id){ ///todo usuniecie z czatu?
+	public static boolean removeModeratorFromChat(String  chatName, int user_id){ ///todo usuniecie z czatu moderatora i jako uzytkownika ::Jacob
 		System.out.println(user_id);
 		try{
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
@@ -615,7 +625,7 @@ public class DatabaseComm {
 	public static boolean setConversationNewData(String  chatName, String newChatName,Image avatar){
 		try{
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement(); ///todo opcja edycji zaproszenia w parametrze i zamiana avatara na bloba
+			statement = connection.createStatement(); ///todo zamiana avatara na bloba ::Jacob
 			query = "call modify_conversation_data('" + chatName + "','" + newChatName + "',0,null);";
 			statement.executeQuery(query);
 			statement.close();

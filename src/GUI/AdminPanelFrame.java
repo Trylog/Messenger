@@ -359,7 +359,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 		return infoTextPanel;
 	}
 	@Override
-	public void actionPerformed(ActionEvent e) { ///todo po usunieciu nie aktualizuje, sprawdzic jaka funkcja dostarcza uzytkownikow, dodac zeby sprawdzala czy is_deleted jest true
+	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == removeUserFormPortalButton){
 			if(userInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano uzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);

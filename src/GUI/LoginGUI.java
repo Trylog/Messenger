@@ -89,7 +89,7 @@ import java.awt.event.MouseEvent;
 		if (e.getSource() == b1){
 			String login = t1.getText();
 			String password = t2.getText();
-			if(Main.databaseComm.login(login, password)){ ///todo zmiana procedury logowania, nie dawac wszystkich procedur, tylko te 4 wybrane wczesniej ale dac selecta na wszystko
+			if(Main.databaseComm.login(login, password)){
 				dispose();
 				Main.gui.mainGUI = new MainGUI();
 			}else{
