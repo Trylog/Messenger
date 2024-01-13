@@ -4,15 +4,11 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.sql.*;
 import java.util.HashMap;
-import javax.sql.*;
-import javax.tools.Tool;
 
 public class DatabaseComm {
 	private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase";

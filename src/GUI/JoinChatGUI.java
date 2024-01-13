@@ -53,13 +53,13 @@ class JoinChatGUI extends JFrame implements ActionListener {
 		// Dodajmy elementów do listy czatów
 		ArrayList <Conversation> chats  = getAllChats(); ///todo getAllChatsWithoutUser(int userid) ::Kamil/Jacob
 		if(chats != null){
-			for (int i = 0; i < chats.size(); i++) {
-				JToggleButton chatButton = new JToggleButton(chats.get(i).name);
+			for (Conversation chat : chats) {
+				JToggleButton chatButton = new JToggleButton(chat.name);
 				chatButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
 				Dimension buttonSize = new Dimension(390, 30);
 				chatButton.setPreferredSize(buttonSize);
 				chatButton.setMaximumSize(buttonSize);
-				chatButton.addActionListener(new JoinChatGUI.ChatButtonListener());
+				chatButton.addActionListener(new ChatButtonListener());
 				chatListPanel.add(chatButton);
 				chatButtonGroup.add(chatButton);
 			}
@@ -142,7 +142,7 @@ class JoinChatGUI extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == joinSelectedChat){
-			if(chatInfoTextArea.getText().equals("")){
+			if(chatInfoTextArea.getText().isEmpty()){
 				JOptionPane.showMessageDialog(null, "Nie wybrano chatu", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
 				System.out.println("Dołączono do czatu - " + chatInfoTextArea.getText());

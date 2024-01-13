@@ -146,8 +146,8 @@ public class MainGUI extends JFrame implements ActionListener {
 
 		// Dodajmy elementów do listy czatów
 		ArrayList <Conversation> chats  = getUsersChat();
-		for(int i=0;i<chats.size();i++){
-			conversationListPanelElement element = new conversationListPanelElement(chats.get(i));
+		for (Conversation chat : chats) {
+			conversationListPanelElement element = new conversationListPanelElement(chat);
 			cContentPanel.add(element);
 		}
 
@@ -156,7 +156,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		this.add(newMessagePane);
 		this.add(sendButton);
 
-		currentConversationName = new String("");
+		currentConversationName = "";
 
 	}
 	@Override
@@ -199,8 +199,8 @@ public class MainGUI extends JFrame implements ActionListener {
 	public static void refreshAllConversationsList() {
 		removeAllConversations();
 		ArrayList <Conversation> chats  = getUsersChat();
-		for(int i=0;i<chats.size();i++){
-			conversationListPanelElement element = new conversationListPanelElement(chats.get(i));
+		for (Conversation chat : chats) {
+			conversationListPanelElement element = new conversationListPanelElement(chat);
 			cContentPanel.add(element);
 		}
 	}
@@ -253,6 +253,7 @@ public class MainGUI extends JFrame implements ActionListener {
 						content.setBackground(Color.cyan);
 						MainGUI.newMessagePane.setBorder(BorderFactory.createTitledBorder("Napisz wiadomość"));
 						isResponding = false;
+						currentRedLabel = null;
 						MainGUI.respondingId = -1;
 					}
 				}
@@ -316,11 +317,7 @@ public class MainGUI extends JFrame implements ActionListener {
 					System.out.println("Kliknięto konwersację: " + name);
 					MainGUI.messagesPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
 					MainGUI.displayedConversationId = conversation.id;
-					if(getModeratorChatIs(name)){
-						moderatorButtonMenu.setEnabled(true);
-					}else{
-						moderatorButtonMenu.setEnabled(false);
-					}
+					moderatorButtonMenu.setEnabled(getModeratorChatIs(name));
 					currentConversationName = name;
 
 				}

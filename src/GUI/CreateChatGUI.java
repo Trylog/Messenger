@@ -160,13 +160,13 @@ class CreateChatGUI extends JFrame implements ActionListener {
 
 		// Dodawanie użytkowników
 		ArrayList <DatabaseComm.User> users = getPortalUsersNames();
-		for (int i = 0; i < users.size(); i++) {
-			UsersToggleButton portalUserButton = new UsersToggleButton(users.get(i).id,users.get(i).username,null);
+		for (User user : users) {
+			UsersToggleButton portalUserButton = new UsersToggleButton(user.id, user.username, null);
 			portalUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
 			Dimension buttonSize = new Dimension(270, 30);
 			portalUserButton.setPreferredSize(buttonSize);
 			portalUserButton.setMaximumSize(buttonSize);
-			portalUserButton.addActionListener(new CreateChatGUI.PortalUserButtonListener());
+			portalUserButton.addActionListener(new PortalUserButtonListener());
 			portalUserListPanel.add(portalUserButton);
 			portalUserButtonGroup.add(portalUserButton);
 		}
@@ -327,7 +327,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		String userName = portalUserInfoTextArea.getText();
 		int userId = portalUserInfoTextArea.id;
 
-		if (userName.equals("")) {
+		if (userName.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		} else if (addedUsers.contains(userId)) {
 			JOptionPane.showMessageDialog(null, "Ten użytkownik został już dodany do czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -353,7 +353,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		String userNameToRemove = chatUserInfoTextArea.getText();
 		int userId = chatUserInfoTextArea.id;
 
-		if (userNameToRemove.equals("")) {
+		if (userNameToRemove.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		} else {
 			// Sprawdzenie, czy użytkownik jest dodany do czatu
@@ -400,7 +400,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		String userName = chatUserInfoTextArea.getText();
 		int userId = chatUserInfoTextArea.id;
 
-		if (userName.equals("")) {
+		if (userName.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		} else if (addedModerators.contains(userId)) {
 			JOptionPane.showMessageDialog(null, "Ten użytkownik został już dodany jako moderator.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -423,7 +423,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 	}
 
 	private void downModeratorPermissionToUser(String userNameToRemove, int userId, boolean extraRemove) {
-		if (userNameToRemove.equals("")) {
+		if (userNameToRemove.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika do usunięcia.", "Błąd", JOptionPane.ERROR_MESSAGE);
 		} else {
 			// Sprawdzenie, czy użytkownik jest dodany jako moderator
@@ -494,7 +494,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		if (e.getSource() == confirmNameAndAvatarButton) {
 			if(avatarLabel == null ){
 				JOptionPane.showMessageDialog(null, "Nie wybrano avatara.", "Błąd", JOptionPane.ERROR_MESSAGE);
-			}else if(chatNameTextField.getText().equals("")){
+			}else if(chatNameTextField.getText().isEmpty()){
 				JOptionPane.showMessageDialog(null, "Nie wybrano nazwy czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
 
 			}else{
@@ -525,11 +525,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		}
 		if (e.getSource() == createChatButton) {
 			boolean invitation;
-			if(invitationtoggleButton.getText().equals("ON")){
-				invitation = true;
-			}else {
-				invitation = false;
-			}
+			invitation = invitationtoggleButton.getText().equals("ON");
 			createChat(chatNameTextField.getText(),filePath,invitation);
 			ArrayList<Integer> addedUsersID = new ArrayList<>(addedUsers);
 			addUserListToChat(chatNameTextField.getText(),addedUsersID);
