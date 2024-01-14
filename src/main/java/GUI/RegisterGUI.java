@@ -97,7 +97,7 @@ public class RegisterGUI extends JFrame implements ActionListener {
 		this.setLayout(null);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Messenger");
-		Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
+		Image icon = new ImageIcon("src/main/java/textures/appIcon.png").getImage();
 		this.setIconImage(icon);
 		this.setVisible(true);
 
@@ -127,7 +127,7 @@ public class RegisterGUI extends JFrame implements ActionListener {
 						dispose();
 						LoginGUI loginGUI = new LoginGUI();
 					}else{
-						dispose();
+						dispose(); ///todo logowanie, odpalanie w taki sposob buguje program, bo nazwa uzytkownika jest pusta
 						Main.gui.mainGUI = new MainGUI();
 					}
 				}

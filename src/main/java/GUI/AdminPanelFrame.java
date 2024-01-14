@@ -1,6 +1,8 @@
 package GUI;
 
 import Main.DatabaseComm;
+import Main.MainComm;
+import Main.ModeratorComm;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -46,7 +48,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 		this.setSize(640, 640);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Messenger - Panel Administratora");
-		Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
+		Image icon = new ImageIcon("src/main/java/textures/appIcon.png").getImage();
 		this.setIconImage(icon);
 		this.setVisible(true);
 
@@ -279,7 +281,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 		addModeratorToList(chatName);
 	}
 	private void addModeratorToList(String chatName) {
-		ArrayList <DatabaseComm.User> moderators = getChatModeratorsNames(chatName);
+		ArrayList <DatabaseComm.User> moderators = ModeratorComm.getChatModeratorsNames(chatName);
 		for (int i = 0; i < moderators.size(); i++) {
 			UsersToggleButton moderatorButton = new UsersToggleButton(moderators.get(i).id,moderators.get(i).username,null);
 			moderatorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -364,7 +366,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			if(userInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano uzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else {
-				if(removeUserFromPortal(userInfoTextArea.id)){
+				if(MainComm.removeUserFromPortal(userInfoTextArea.id)){
 					System.out.println("Uzytkownik usunięty z portalu " + userInfoTextArea.getText());
 					refreshUserList();
 					userInfoTextArea.setText("");
@@ -379,7 +381,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			if(moderatorInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano moderatora.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else {
-				if(removeModeratorFromChat(chatInfoTextArea.getText(),moderatorInfoTextArea.id)){
+				if(ModeratorComm.removeModeratorFromChat(chatInfoTextArea.getText(),moderatorInfoTextArea.id)){
 					System.out.println("Moderator usunięty z czatu " + chatInfoTextArea.getText());
 					refreshModeratorList(chatInfoTextArea.getText());
 					moderatorInfoTextArea.setText("");

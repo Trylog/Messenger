@@ -67,13 +67,13 @@ public class DatabaseComm {
 	}
 
 	//funkcja do rejestrowania nowego uzytkownika
-	public String register(String Imie, String Nazwisko, String password, String filepath){ ///todo okienko do rejestracji = doslownie 3 pola tekstowe, ew. jakas opcja weryfikacji admina, dodanie avatara
+	public String register(String Imie, String Nazwisko, String password, String filepath){
 		try{
 			Class.forName(DBDRIVER);
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			PreparedStatement prs = connection.prepareStatement("call add_new_user(?, ?, ?, ?, False);");
-			///TODO musi zwrócić login
+
 			prs.setString(1,password);
 			prs.setString(2,Imie);
 			prs.setString(3,Nazwisko);
@@ -82,16 +82,20 @@ public class DatabaseComm {
 
 			prs.executeQuery();
 			prs.close();
+			query = "SELECT LAST_INSERT_ID()";
+			ResultSet rs = statement.executeQuery(query);
+			rs.next();
+			String log = rs.getString("LAST_INSERT_ID()");
 			statement.close();
 			connection.close();
+			return log;
 		} catch (Exception e){
 			e.printStackTrace();
 			return null;
 		}
-		return "";
 	}
 
-	public boolean login(String login, String password){ ///todo zweryfikowac wplyw logowania na status, dodac funkcje ktora przy wylaczeniu aplikacji przestawi w tryb not_active
+	public boolean login(String login, String password){ ///todo dodac funkcje ktora przy wylaczeniu aplikacji przestawi w tryb not_active
 		DBUSER = login;
 		DBPASS = password;
 		try{
@@ -116,7 +120,6 @@ public class DatabaseComm {
 				try{
 					currentuser = new User(userId,username,new ImageIcon(img));
 				} catch (Exception e){
-					e.printStackTrace();
 					currentuser = new User(userId,username,null);
 				}
 				statement.close();
@@ -130,9 +133,12 @@ public class DatabaseComm {
 			DBUSER = String.valueOf(userId);
 			try{
 				connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+				statement = connection.createStatement();
+				query = "call make_active(" + userId + ")";
 			} catch (Exception e){
 				return false;
 			}
+			statement.close();
 			connection.close();
 		} catch (Exception ex){
 			ex.printStackTrace();
@@ -308,7 +314,6 @@ public class DatabaseComm {
 				rs.next();
 				id = rs.getInt("conversation_id");
 			} catch (Exception e){
-				e.printStackTrace();
 				id = 1;
 			}
 			query = "call show_messages(" + id + ");";
@@ -372,30 +377,6 @@ public class DatabaseComm {
 		return  usersNames;
 	}
 
-	//Nie podaje samego siebie
-	//ModeratorzyDanegoCzatu
-	public static ArrayList <User> getChatModeratorsNames(String chatName){
-		ArrayList <User> usersNames = new ArrayList<>();
-
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = '" + chatName + "'))";
-			ResultSet rs = statement.executeQuery(query);
-			while(rs.next()){
-				if(rs.getString("is_deleted").equals("yes")) continue; // bez avatarow, wystarcza same nazwy
-				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
-				usersNames.add(user);
-			}
-			statement.close();
-			connection.close();
-		} catch (Exception e){
-			e.printStackTrace();
-			return null;
-		}
-
-		return  usersNames;
-	}
 
 	//Czy Dany Użytkownik Jest Adminem
 	public static boolean getAdminIs(){
@@ -458,12 +439,12 @@ public class DatabaseComm {
 	}
 
 	//Wszystkie istniejące czaty
-	public static ArrayList <Conversation> getAllChats(){ ///todo wywalic te w ktorych jest user, dodac userid  ::Jacob
+	public static ArrayList <Conversation> getAllChats(){
 		ArrayList<Conversation> allChats = new ArrayList<>();
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
-			query = "SELECT * FROM conversations";
+			query = "select * from conversations where id NOT IN (select conversation_id from conversation_members where user_id = " + userId + ")";
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()){
 				allChats.add(new Conversation(rs.getInt("id"),rs.getString("name"),null));
@@ -486,21 +467,6 @@ public class DatabaseComm {
 			return true;
 		} catch (Exception e){
 			e.printStackTrace();
-			return false;
-		}
-	}
-
-	public static boolean addUserToChat(String  chatName,int user_Id){
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			query = "call add_user_by_id(" + user_Id + ", '" + chatName + "');";
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception exception){
-			exception.printStackTrace();
 			return false;
 		}
 	}
@@ -528,153 +494,23 @@ public class DatabaseComm {
 			return false;
 		}
 	}
-	//dodaje uztykownikow z listy id do chatu
-	public static boolean addUserListToChat(String  chatName,ArrayList<Integer> usersID){
-		try {
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			for(Integer user : usersID){
-				query = "call add_user_by_id(" + user + ", '" + chatName + "');";
-				statement.executeQuery(query);
-			}
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
 
-	//dodaje moderatorow z listy id do modow chatu
-	public static boolean addModeratorListToChat(String  chatName, ArrayList<Integer> usersID){
-		if(usersID.isEmpty()) return false;
-		try {
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			for(Integer user : usersID){
-				query = "call add_moderator_by_id(" + user + ", '" + chatName + "');";
-				statement.executeQuery(query);
-			}
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
 
-	//Musi sprawdzić czy użytkownik Nie jestModeratorem ///todo - nie ma procedury na usuwanie przez moderatora, istnieje tylko wywalenie samego siebie ::Jacob
-	public static boolean removeUserFromChat(String  chatName,int userId){
-		System.out.println(userId);
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			query = ""; //remove_user_from_conversation pozwala na wywalenie siebie samego
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
 
-	//Obniża swoje uprawnienia
-	public static boolean downModeratorPermision(String  chatName, int userId){ ///todo delete_moderator_by_moderator ::Jacob
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			query = "call delete_moderator('" + chatName + "');";
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
 
-	//podnosi uprawnienia uzytkownika
-	public static boolean upModeratorPermision(String  chatName, int userId){
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			query = "call add_moderator_by_id(" + userId +", '" + chatName + "');";
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
 
-	public static boolean removeModeratorFromChat(String  chatName, int user_id){ ///todo usuniecie z czatu moderatora i jako uzytkownika ::Jacob
-		System.out.println(user_id);
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			query = "call delete_moderator_by_moderator(" + userId + ",'" + chatName + "');";
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
 
-	public static boolean removeConversation(String  chatName){
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			query = "call chat_delete('" + chatName +"');";
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
 
-	public static boolean setConversationNewData(String  chatName, String newChatName,Image avatar){
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement(); ///todo zamiana avatara na bloba ::Jacob
-			query = "call modify_conversation_data('" + chatName + "','" + newChatName + "',0,null);";
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
 
-	public static boolean removeUserFromPortal(int removed_user_id){
-		System.out.println(removed_user_id);
-		try{
-			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
-			statement = connection.createStatement();
-			query = "call remove_user_from_portal(" + removed_user_id + ");";
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-			return true;
-		} catch (Exception e){
-			e.printStackTrace();
-			return false;
-		}
-	}
+
+
+
+
+
+
+
+
+
 
 
 }

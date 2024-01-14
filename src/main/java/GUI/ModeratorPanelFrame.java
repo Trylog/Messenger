@@ -1,6 +1,8 @@
 package GUI;
 
+import Main.ChatComm;
 import Main.DatabaseComm;
+import Main.ModeratorComm;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -53,7 +55,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		this.setSize(940, 680);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Messenger - Panel Moderatora - " + chatName);
-		Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
+		Image icon = new ImageIcon("src/main/java/textures/appIcon.png").getImage();
 		this.setIconImage(icon);
 		this.setVisible(true);
 
@@ -296,7 +298,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 
 	// Dodawanie przycisków moderatorów czatu
 	private void addChatModeratorsToList() { ///todo sprawdzic bug z dublowaniem sie nazw? ::Kamil
-		ArrayList<DatabaseComm.User> moderators = getChatModeratorsNames(chatName);
+		ArrayList<DatabaseComm.User> moderators = ModeratorComm.getChatModeratorsNames(chatName);
 		for (User moderator : moderators) {
 			UsersToggleButton chatModeratorButton = new UsersToggleButton(moderator.id, moderator.username, moderator.icon);
 			chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -372,7 +374,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
 				if(!isUserInGroup(portalUserInfoTextArea.getText(), chatUserButtonGroup)){
-					if(addUserToChat(chatName,portalUserInfoTextArea.id)){
+					if(ChatComm.addUserToChat(chatName,portalUserInfoTextArea.id)){
 						System.out.println("Dodanie użytkownika");
 					}else{
 						JOptionPane.showMessageDialog(null, "Nie udało się dodać urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -387,7 +389,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			if(chatUserInfoTextArea.getText().isEmpty()){
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
-				if(removeUserFromChat(chatName,chatUserInfoTextArea.id)){
+				if(ChatComm.removeUserFromChat(chatName,chatUserInfoTextArea.id)){
 					System.out.println("Usuniecie użytkownika");
 				}else{
 					JOptionPane.showMessageDialog(null, "Nie udało się usunąć urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -399,7 +401,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			if(chatModeratorInfoTextArea.getText().isEmpty()){
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
-				if(downModeratorPermision(chatName,chatModeratorInfoTextArea.id)){
+				if(ModeratorComm.downModeratorPermision(chatName,chatModeratorInfoTextArea.id)){
 					System.out.println("Obniżenie uprawnień");
 				}else{
 					JOptionPane.showMessageDialog(null, "Nie udało się obniżyć uprawnień.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -413,7 +415,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
 				if(!isUserInGroup(chatUserInfoTextArea.getText(), chatModeratorButtonGroup)){
-					if(upModeratorPermision(chatName,chatUserInfoTextArea.id)){
+					if(ModeratorComm.upModeratorPermision(chatName,chatUserInfoTextArea.id)){
 						System.out.println("Podniesienie uprawnień");
 					}else{
 						JOptionPane.showMessageDialog(null, "Nie udało się podnieść uprawneń.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -430,7 +432,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			ChatDataModyfieGUI chatDataModyfieGUI = new ChatDataModyfieGUI(chatName);
 		}
 		if(e.getSource() == removeConversationButton){
-			if(removeConversation(chatName)){
+			if(ChatComm.removeConversation(chatName)){
 				System.out.println("Konwersacja usunięta");
 			}else{
 				JOptionPane.showMessageDialog(null, "Nie udało się usunąć konwersacji.", "Błąd", JOptionPane.ERROR_MESSAGE);
