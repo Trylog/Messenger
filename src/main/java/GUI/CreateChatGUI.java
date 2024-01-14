@@ -1,6 +1,8 @@
 package GUI;
 
+import Main.ChatComm;
 import Main.DatabaseComm;
+import Main.ModeratorComm;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -64,7 +66,7 @@ class CreateChatGUI extends JFrame implements ActionListener {
 		this.setSize(940, 580);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Okno tworzenia czatu");
-		Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
+		Image icon = new ImageIcon("src/main/java/textures/appIcon.png").getImage();
 		this.setIconImage(icon);
 		this.setVisible(true);
 
@@ -532,9 +534,9 @@ class CreateChatGUI extends JFrame implements ActionListener {
 			invitation = invitationtoggleButton.getText().equals("ON");
 			createChat(chatNameTextField.getText(),filePath,invitation);
 			ArrayList<Integer> addedUsersID = new ArrayList<>(addedUsers);
-			addUserListToChat(chatNameTextField.getText(),addedUsersID);
+			ChatComm.addUserListToChat(chatNameTextField.getText(),addedUsersID);
 			ArrayList<Integer> addedModeratorsID = new ArrayList<>(addedModerators);
-			addModeratorListToChat(chatNameTextField.getText(),addedModeratorsID);
+			ModeratorComm.addModeratorListToChat(chatNameTextField.getText(),addedModeratorsID);
 			refreshAllConversationsList();
 			dispose();
 		}

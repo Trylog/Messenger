@@ -72,7 +72,7 @@ import java.awt.event.MouseEvent;
 		this.setLayout(null);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Messenger");
-		Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
+		Image icon = new ImageIcon("src/main/java/textures/appIcon.png").getImage();
 		this.setIconImage(icon);
 		this.setVisible(true);
 

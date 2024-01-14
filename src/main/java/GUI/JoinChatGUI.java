@@ -30,7 +30,7 @@ class JoinChatGUI extends JFrame implements ActionListener {
 		this.setSize(460, 380);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Okno Dołaczania do czatu");
-		Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
+		Image icon = new ImageIcon("src/main/java/textures/appIcon.png").getImage();
 		this.setIconImage(icon);
 		this.setVisible(true);
 

@@ -45,7 +45,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		this.setSize(800, 680);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Messenger");
-		icon = new ImageIcon("src/textures/appIcon.png").getImage();
+		icon = new ImageIcon("src/main/java/textures/appIcon.png").getImage();
 		this.setIconImage(icon);
 		this.setVisible(true);
 
@@ -74,7 +74,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		newMessagePane.setBounds(300, 580 - 4*border, 500-(border*2)-100, 100);
 		newMessagePane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-		Icon sendIcon = new ImageIcon("src/textures/send.png");
+		Icon sendIcon = new ImageIcon("src/main/java/textures/send.png");
 		sendButton = new JButton(sendIcon);
 		sendButton.setBounds(700 - border*2 +10,580 - 4*border+10,80,80);
 		sendButton.addActionListener(this);

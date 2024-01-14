@@ -1,5 +1,7 @@
 package GUI;
 
+import Main.ChatComm;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -18,6 +20,7 @@ class ChatDataModyfieGUI extends JFrame implements ActionListener {
 	 private JButton chooseAvatarButton;
 	 private JButton confirmNameAndAvatarButton;
 
+	 private String filePath;
 
 	private Image scaledImage;
 	private String oldChatName;
@@ -29,7 +32,7 @@ class ChatDataModyfieGUI extends JFrame implements ActionListener {
 		this.setSize(640, 200);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Modyfikacja danych czatu - " + chatName);
-		Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
+		Image icon = new ImageIcon("src/main/java/textures/appIcon.png").getImage();
 		this.setIconImage(icon);
 		this.setVisible(true);
 
@@ -78,6 +81,7 @@ class ChatDataModyfieGUI extends JFrame implements ActionListener {
 				int result = fileChooser.showOpenDialog(this);
 				if (result == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
+					filePath = file.getPath();
 					ImageIcon originalIcon = new ImageIcon(file.getAbsolutePath());
 
 					// Przeskalowanie obrazu
@@ -100,11 +104,11 @@ class ChatDataModyfieGUI extends JFrame implements ActionListener {
 				}else{
 					String chatName = chatNameTextField.getText();
 					if(chatName.equals("")){
-						setConversationNewData(oldChatName,oldChatName,scaledImage);
+						ChatComm.setConversationNewData(oldChatName,oldChatName,filePath);
 					}else if(avatarLabel == null){
-						setConversationNewData(oldChatName,chatName,null);
+						ChatComm.setConversationNewData(oldChatName,chatName,null);
 					}else{
-						setConversationNewData(oldChatName,chatName,scaledImage);
+						ChatComm.setConversationNewData(oldChatName,chatName,filePath);
 					}
 					dispose();
 				}
