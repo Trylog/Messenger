@@ -68,8 +68,8 @@ import java.awt.event.MouseEvent;
 
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setResizable(false);
-		this.setLayout(null);
 		this.setSize(500, 450);
+		this.setLayout(null);
 		this.setLocationRelativeTo(null);
 		this.setTitle("Messenger");
 		Image icon = new ImageIcon("src/textures/appIcon.png").getImage();
@@ -99,9 +99,8 @@ import java.awt.event.MouseEvent;
 			}
 
 		} else if (e.getSource() == b2) {
-			String login = t1.getText();
-			String password = t2.getText();
-
+			dispose();
+			RegisterGUI register = new RegisterGUI();
 		}
 	}
 }

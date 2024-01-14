@@ -67,13 +67,13 @@ public class DatabaseComm {
 	}
 
 	//funkcja do rejestrowania nowego uzytkownika
-	public boolean register(String Imie, String Nazwisko, String password, String filepath){ ///todo okienko do rejestracji = doslownie 3 pola tekstowe, ew. jakas opcja weryfikacji admina, dodanie avatara
+	public String register(String Imie, String Nazwisko, String password, String filepath){ ///todo okienko do rejestracji = doslownie 3 pola tekstowe, ew. jakas opcja weryfikacji admina, dodanie avatara
 		try{
 			Class.forName(DBDRIVER);
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
 			PreparedStatement prs = connection.prepareStatement("call add_new_user(?, ?, ?, ?, False);");
-
+			///TODO musi zwrócić login
 			prs.setString(1,password);
 			prs.setString(2,Imie);
 			prs.setString(3,Nazwisko);
@@ -86,9 +86,9 @@ public class DatabaseComm {
 			connection.close();
 		} catch (Exception e){
 			e.printStackTrace();
-			return false;
+			return null;
 		}
-		return true;
+		return "";
 	}
 
 	public boolean login(String login, String password){ ///todo zweryfikowac wplyw logowania na status, dodac funkcje ktora przy wylaczeniu aplikacji przestawi w tryb not_active
@@ -193,7 +193,7 @@ public class DatabaseComm {
 	public HashMap<String, Integer> getReactions(int msId){
 		HashMap<String, Integer> reactions = new HashMap<>();
 		int[] counts = {0,0,0,0,0,0,0,0};
-		String[] reaction = {"❤","❤","❤","❤","❤","❤","❤","❤"}; ///todo dodac rodzaje emotikonow
+		String[] reaction = {"\uD83D\uDC4D","\uD83D\uDE42","❤","❔","\uD83D\uDC4E","\uD83D\uDE22","\uD83D\uDC4F","\uD83D\uDC7B"};
 		try{
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
@@ -242,13 +242,40 @@ public class DatabaseComm {
 		return reactions;
 	}
 
-	public User getCurrentuser(){
-		return currentuser;
+	public HashMap<String, User> getReactionsUsers(int msId){
+		HashMap<String, User> reactions = new HashMap<>();
+		String[] reactionDictionary = {"\uD83D\uDC4D","\uD83D\uDE42","❤","❔","\uD83D\uDC4E","\uD83D\uDE22","\uD83D\uDC4F","\uD83D\uDC7B"};
+		try{
+			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+			statement = connection.createStatement();
+			query = "SELECT i.user_id, i.type_of_interaction, (SELECT first_name FROM users WHERE user_id = i.user_id) AS first_name, " +
+					"(SELECT last_name FROM users WHERE id = i.user_id) AS last_name, (SELECT avatar FROM users WHERE user_id = i.user_id) AS avatar" +
+					" FROM interactions i WHERE MESSAGE_ID = " + msId + ";";
+			ResultSet rs = statement.executeQuery(query);
+			while(rs.next()){
+				Image img;
+				try{
+					Blob blob = rs.getBlob("avatar");
+					InputStream in = blob.getBinaryStream();
+					img = ImageIO.read(in);
+				} catch (Exception e){
+					img = null;
+				}
+				reactions.put(reactionDictionary[rs.getInt("type_of_reaction")], new  User(rs.getInt("user_id"),
+						rs.getString("first_name") + " " + rs.getString("last_name"), new ImageIcon(img)));
+			}
+			statement.close();
+			connection.close();
+		} catch (Exception ex){
+			ex.printStackTrace();
+			return null;
+		}
+		return reactions;
 	}
 
 	public void sendReaction(int msId, String reactionId){
 		int typeOfReaction = -1;
-		String[] reaction = {"❤","❤","❤","❤","❤","❤","❤","❤"}; ///todo dodac rodzaje emotikonow
+		String[] reaction = {"\uD83D\uDC4D","\uD83D\uDE42","❤","❔","\uD83D\uDC4E","\uD83D\uDE22","\uD83D\uDC4F","\uD83D\uDC7B"};
 		for(int i=0;i<7;i++){
 			if(reactionId.equals(reaction[i])) typeOfReaction = i;
 		}

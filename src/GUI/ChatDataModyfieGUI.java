@@ -1,6 +1,7 @@
 package GUI;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -69,10 +70,15 @@ class ChatDataModyfieGUI extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == chooseAvatarButton) {
 				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setDialogTitle("Choose chat Avatar");
+				fileChooser.setCurrentDirectory(new File("."));
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Image (.png, .jpg, .jpeg, .bmp)", "png", "jpg", "jpeg", "bmp");
+				fileChooser.setFileFilter(filter);
+
 				int result = fileChooser.showOpenDialog(this);
 				if (result == JFileChooser.APPROVE_OPTION) {
-					File selectedFile = fileChooser.getSelectedFile();
-					ImageIcon originalIcon = new ImageIcon(selectedFile.getAbsolutePath());
+					File file = fileChooser.getSelectedFile();
+					ImageIcon originalIcon = new ImageIcon(file.getAbsolutePath());
 
 					// Przeskalowanie obrazu
 					scaledImage = originalIcon.getImage().getScaledInstance(avatarPanel.getWidth() - 20, avatarPanel.getHeight() - 30, Image.SCALE_SMOOTH);

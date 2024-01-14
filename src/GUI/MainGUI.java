@@ -265,6 +265,13 @@ public class MainGUI extends JFrame implements ActionListener {
 			///REAKCJE
 			JPanel emoji = new JPanel();
 			emoji.setLayout(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+			emoji.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mousePressed(MouseEvent e) {
+					var reactions = Main.databaseComm.getReactionsUsers(messageData.senderId);
+
+				}
+			});
 
 			var reactions = Main.databaseComm.getReactions(messageData.id);
 

@@ -5,6 +5,7 @@ import Main.DatabaseComm;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -469,13 +470,16 @@ class CreateChatGUI extends JFrame implements ActionListener {
 
 		if (e.getSource() == chooseAvatarButton) {
 			JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES); ///todo tylko grafika do wyboru ::Kamil/Michał
+			fileChooser.setDialogTitle("Choose chat Avatar");
+			fileChooser.setCurrentDirectory(new File("."));
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Image (.png, .jpg, .jpeg, .bmp)", "png", "jpg", "jpeg", "bmp");
+			fileChooser.setFileFilter(filter);
+
 			int result = fileChooser.showOpenDialog(this);
-			File file = fileChooser.getSelectedFile(); // Scieżka do utworzenia avatara
-			filePath = file.getPath();
 			if (result == JFileChooser.APPROVE_OPTION) {
-				File selectedFile = fileChooser.getSelectedFile();
-				ImageIcon originalIcon = new ImageIcon(selectedFile.getAbsolutePath());
+				File file = fileChooser.getSelectedFile();
+				filePath = file.getPath();
+				ImageIcon originalIcon = new ImageIcon(file.getAbsolutePath());
 
 				// Przeskalowanie obrazu
 				scaledImage = originalIcon.getImage().getScaledInstance(avatarPanel.getWidth() - 20, avatarPanel.getHeight() - 30, Image.SCALE_SMOOTH);
