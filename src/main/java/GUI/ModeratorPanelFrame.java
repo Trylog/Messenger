@@ -375,9 +375,10 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			}else{
 				if(!isUserInGroup(portalUserInfoTextArea.getText(), chatUserButtonGroup)){
 					if(ChatComm.addUserToChat(chatName,portalUserInfoTextArea.id)){
+						System.out.println(chatName);
 						System.out.println("Dodanie użytkownika");
 					}else{
-						JOptionPane.showMessageDialog(null, "Nie udało się dodać urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(null, "Nie udało się dodać uzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 					}
 					refreshChatUserList();
 				}else{
@@ -432,7 +433,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			ChatDataModyfieGUI chatDataModyfieGUI = new ChatDataModyfieGUI(chatName);
 		}
 		if(e.getSource() == removeConversationButton){
-			if(ChatComm.removeConversation(chatName)){
+			if(ChatComm.removeConversation(chatName)){ ///todo refresh po usunieciu
 				System.out.println("Konwersacja usunięta");
 			}else{
 				JOptionPane.showMessageDialog(null, "Nie udało się usunąć konwersacji.", "Błąd", JOptionPane.ERROR_MESSAGE);
