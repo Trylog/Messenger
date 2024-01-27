@@ -342,7 +342,7 @@ public class DatabaseComm {
 			query = "SELECT * FROM users";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
-				if(rs.getString("is_deleted").equals("yes")) continue;
+				if(rs.getBoolean("is_deleted")) continue;
 				if(rs.getInt("id")==userId) continue;
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
 				usersNames.add(user);
@@ -367,7 +367,7 @@ public class DatabaseComm {
 			query = "select * from users where id in (select user_id from conversation_members where conversation_id = (select id from conversations where name = '" + chatName + "'))";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
-				if(rs.getString("is_deleted").equals("yes")) continue; // bez avatarow, wystarcza same nazwy
+				if(rs.getBoolean("is_deleted")) continue; // bez avatarow, wystarcza same nazwy
 				User user = new User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
 				usersNames.add(user);
 			}
@@ -384,7 +384,7 @@ public class DatabaseComm {
 
 	//Czy Dany Użytkownik Jest Adminem
 	public static boolean getAdminIs(){
-		return true;
+		return isAdmin;
 	}
 
 	//Czy dany użytkownik Jest Moderatorem Tego Czatu

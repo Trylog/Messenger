@@ -27,7 +27,7 @@ public class ModeratorComm {
             query = "SELECT * FROM users WHERE id IN (SELECT user_id from moderators where conversation_id = (SELECT id from conversations where name = '" + chatName + "'))";
             ResultSet rs = statement.executeQuery(query);
             while(rs.next()){
-                if(rs.getString("is_deleted").equals("yes")) continue; // bez avatarow, wystarcza same nazwy
+                if(rs.getBoolean("is_deleted")) continue; // bez avatarow, wystarcza same nazwy
                 DatabaseComm.User user = new DatabaseComm.User(rs.getInt("id"),rs.getString("first_name") + " " + rs.getString("last_name"),null);
                 usersNames.add(user);
             }
