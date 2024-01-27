@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class ChatComm {
-    private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase";
+    private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase?serverTimezone=CET";
     private final static String DBDRIVER = "com.mysql.cj.jdbc.Driver";
     private final static String DBOPERATOR = "procedury";
     private final static String DBROOTPASS = "Proc@1234";
@@ -15,7 +15,7 @@ public class ChatComm {
     private static String query;
 
     //Musi sprawdzić czy użytkownik Nie jestModeratorem
-    public static boolean removeUserFromChat(String  chatName,int userId){
+    public static boolean removeUserFromChat(String  chatName,int userId){//TODO:Kamil - Jeżeli usuwa użytkownika to musi sprawdzić czy jest moderatorem i też go usunąć
         System.out.println(userId);
         try{
             connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);

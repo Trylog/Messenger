@@ -11,7 +11,7 @@ import java.sql.*;
 import java.util.HashMap;
 
 public class DatabaseComm {
-	private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase";
+	private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase?serverTimezone=CET";
 	private static String DBUSER;
 	private static String DBPASS;
 	private final static String DBDRIVER = "com.mysql.cj.jdbc.Driver";
