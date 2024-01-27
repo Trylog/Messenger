@@ -366,7 +366,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			if(userInfoTextArea.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Nie wybrano uzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else {
-				if(MainComm.removeUserFromPortal(userInfoTextArea.id)){
+				if(MainComm.removeUserFromPortal(userInfoTextArea.id)){ ///todo sprawdzic odswiezanie uzytkownikow, dubluje sie przy usuwaniu, dopiero restart okienka dziala
 					System.out.println("Uzytkownik usunięty z portalu " + userInfoTextArea.getText());
 					refreshUserList();
 					userInfoTextArea.setText("");
