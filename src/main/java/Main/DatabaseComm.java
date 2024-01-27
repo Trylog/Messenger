@@ -67,7 +67,7 @@ public class DatabaseComm {
 	}
 
 	//funkcja do rejestrowania nowego uzytkownika
-	public String register(String Imie, String Nazwisko, String password, String filepath){
+	public String register(String Imie, String Nazwisko, String password, String filepath){ ///todo komunikaty jesli pola sa puste/haslo za krotkie
 		try{
 			Class.forName(DBDRIVER);
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
