@@ -15,7 +15,7 @@ public class ChatComm {
     private static String query;
 
     //Musi sprawdzić czy użytkownik Nie jestModeratorem
-    public static boolean removeUserFromChat(String  chatName,int userId){//TODO:Kamil - Jeżeli usuwa użytkownika to musi sprawdzić czy jest moderatorem i też go usunąć
+    public static boolean removeUserFromChat(String  chatName,int userId){
         System.out.println(userId);
         try{
             connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);

@@ -51,7 +51,7 @@ class JoinChatGUI extends JFrame implements ActionListener {
 		chatButtonGroup = new ButtonGroup();
 
 		// Dodajmy elementów do listy czatów
-		ArrayList <Conversation> chats  = getAllChats(); ///todo getAllChatsWithoutUser(int userid) ::Kamil/Jacob
+		ArrayList <Conversation> chats  = getAllChatsUser();
 		if(chats != null){
 			for (Conversation chat : chats) {
 				JToggleButton chatButton = new JToggleButton(chat.name);
