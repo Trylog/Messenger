@@ -7,7 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 public class ModeratorComm {
-    private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase";
+    private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase?serverTimezone=CET";
     private final static String DBDRIVER = "com.mysql.cj.jdbc.Driver";
     private final static String DBOPERATOR = "procedury";
     private final static String DBROOTPASS = "Proc@1234";

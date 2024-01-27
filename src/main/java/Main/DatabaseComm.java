@@ -1,5 +1,7 @@
 package Main;
 
+import GUI.MainGUI;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +13,7 @@ import java.sql.*;
 import java.util.HashMap;
 
 public class DatabaseComm {
-	private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase";
+	private final static String DBURL = "jdbc:mysql://localhost:3306/messengerdatabase?serverTimezone=CET";
 	private static String DBUSER;
 	private static String DBPASS;
 	private final static String DBDRIVER = "com.mysql.cj.jdbc.Driver";
@@ -21,6 +23,7 @@ public class DatabaseComm {
 	private static Connection connection;
 	private static Statement statement;
 	private static String query;
+	private static String query2;
 
 	public static int userId;
 
@@ -160,6 +163,8 @@ public class DatabaseComm {
 			return;
 		}
 		System.out.println("Konwersacja: " + conversationId + "; Nowa wiadomość: " + content);
+		MainGUI.refreshShownMessages();
+
 	}
 
 	int getCurrentUserId(){
@@ -174,14 +179,16 @@ public class DatabaseComm {
 			query = "SELECT * FROM users WHERE ID = " + id + ";";
 			ResultSet rs = statement.executeQuery(query);
 			rs.next();
-				Image img;
-				try{
-					Blob blob = rs.getBlob("avatar");
-					InputStream in = blob.getBinaryStream();
-					img = ImageIO.read(in);
-				} catch (Exception e){
-					img = null;
-				}
+			Image img;
+			try{
+				Blob blob = rs.getBlob("avatar");
+				InputStream in = blob.getBinaryStream();
+				img = ImageIO.read(in);
+				img = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+			} catch (Exception e){
+				img = null;
+			}
+
 			try {
 				user = new User(rs.getInt("id"), rs.getString("first_name") + " " + rs.getString("last_name"), new ImageIcon(img));
 			} catch (Exception e){
@@ -248,27 +255,32 @@ public class DatabaseComm {
 		return reactions;
 	}
 
-	public HashMap<String, User> getReactionsUsers(int msId){
-		HashMap<String, User> reactions = new HashMap<>();
+	public HashMap<User, String> getReactionsUsers(int msId){
+		HashMap<User, String> reactions = new HashMap<>();
 		String[] reactionDictionary = {"\uD83D\uDC4D","\uD83D\uDE42","❤","❔","\uD83D\uDC4E","\uD83D\uDE22","\uD83D\uDC4F","\uD83D\uDC7B"};
 		try{
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
-			query = "SELECT i.user_id, i.type_of_interaction, (SELECT first_name FROM users WHERE user_id = i.user_id) AS first_name, " +
-					"(SELECT last_name FROM users WHERE id = i.user_id) AS last_name, (SELECT avatar FROM users WHERE user_id = i.user_id) AS avatar" +
-					" FROM interactions i WHERE MESSAGE_ID = " + msId + ";";
+			query = "SELECT user_id, type_of_interaction FROM interactions WHERE MESSAGE_ID = " + msId + ";";
 			ResultSet rs = statement.executeQuery(query);
 			while(rs.next()){
+				Connection connection1 = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
+				Statement statement1 = connection.createStatement();
+				int userId = rs.getInt("user_id");
+				query2 = "SELECT first_name, last_name, avatar FROM users WHERE id = " + userId + ";";
+				ResultSet rs2 = statement1.executeQuery(query2);
+				rs2.next();
 				Image img;
 				try{
-					Blob blob = rs.getBlob("avatar");
+					Blob blob = rs2.getBlob("avatar");
 					InputStream in = blob.getBinaryStream();
 					img = ImageIO.read(in);
 				} catch (Exception e){
 					img = null;
 				}
-				reactions.put(reactionDictionary[rs.getInt("type_of_reaction")], new  User(rs.getInt("user_id"),
-						rs.getString("first_name") + " " + rs.getString("last_name"), new ImageIcon(img)));
+				reactions.put(new  User(userId, rs2.getString("first_name") + " " + rs2.getString("last_name"), new ImageIcon(img)), reactionDictionary[rs.getInt("type_of_interaction")]);
+				statement1.close();
+				connection1.close();
 			}
 			statement.close();
 			connection.close();
@@ -299,7 +311,7 @@ public class DatabaseComm {
 		}
 	}
 
-	public ArrayList<Message> getMessages(){
+	public ArrayList<Message> getMessages(int conversationId){
 		ArrayList<Message> messages = new ArrayList<>();
 
 		int id;
@@ -308,15 +320,7 @@ public class DatabaseComm {
 			ResultSet rs;
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
 			statement = connection.createStatement();
-			try{
-				query = "SELECT conversation_id FROM conversation_members WHERE user_id = " + userId + ";";
-				rs = statement.executeQuery(query);
-				rs.next();
-				id = rs.getInt("conversation_id");
-			} catch (Exception e){
-				id = 1;
-			}
-			query = "call show_messages(" + id + ");";
+			query = "call show_messages(" + conversationId + ");";
 			rs = statement.executeQuery(query);
 			while (rs.next()){
 				messages.add(new Message(rs.getInt("id"),rs.getString("content"),rs.getInt("user_id"),rs.getInt("answer_to_id")));
@@ -380,7 +384,7 @@ public class DatabaseComm {
 
 	//Czy Dany Użytkownik Jest Adminem
 	public static boolean getAdminIs(){
-		return isAdmin;
+		return true;
 	}
 
 	//Czy dany użytkownik Jest Moderatorem Tego Czatu
