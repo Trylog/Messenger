@@ -70,7 +70,7 @@ public class DatabaseComm {
 	}
 
 	//funkcja do rejestrowania nowego uzytkownika
-	public String register(String Imie, String Nazwisko, String password, String filepath){ ///todo komunikaty jesli pola sa puste/haslo za krotkie
+	public String register(String Imie, String Nazwisko, String password, String filepath){
 		try{
 			Class.forName(DBDRIVER);
 			connection = DriverManager.getConnection(DBURL,DBOPERATOR,DBROOTPASS);
@@ -98,7 +98,7 @@ public class DatabaseComm {
 		}
 	}
 
-	public boolean login(String login, String password){
+	public boolean login(String login, String password){ ///todo dodac funkcje ktora przy wylaczeniu aplikacji przestawi w tryb not_active
 		DBUSER = login;
 		DBPASS = password;
 		try{
@@ -137,8 +137,7 @@ public class DatabaseComm {
 			try{
 				connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 				statement = connection.createStatement();
-				query = "call make_active();";
-				statement.executeQuery(query);
+				query = "call make_active(" + userId + ")";
 			} catch (Exception e){
 				return false;
 			}
@@ -149,19 +148,6 @@ public class DatabaseComm {
 			return false;
 		}
 		return true;
-	}
-
-	public static void makeInactive() {
-		try{
-			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
-			statement = connection.createStatement();
-			query = "call make_not_active();";
-			statement.executeQuery(query);
-			statement.close();
-			connection.close();
-		} catch (Exception e){
-			e.printStackTrace();
-		}
 	}
 
 	public void sendMessage(int conversationId, String content, int answerToId){
@@ -457,28 +443,12 @@ public class DatabaseComm {
 	}
 
 	//Wszystkie istniejące czaty
-	public static ArrayList <Conversation> getAllChatsUser(){
-		ArrayList<Conversation> allChats = new ArrayList<>();
-		try {
-			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
-			statement = connection.createStatement();
-			query = "select * from conversations where id NOT IN (select conversation_id from conversation_members where user_id = " + userId + ")";
-			ResultSet rs = statement.executeQuery(query);
-			while (rs.next()){
-				allChats.add(new Conversation(rs.getInt("id"),rs.getString("name"),null));
-			}
-		} catch (Exception exception){
-			exception.printStackTrace();
-			return null;
-		}
-		return allChats;
-	}
 	public static ArrayList <Conversation> getAllChats(){
 		ArrayList<Conversation> allChats = new ArrayList<>();
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
-			query = "select * from conversations ";
+			query = "select * from conversations where id NOT IN (select conversation_id from conversation_members where user_id = " + userId + ")";
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()){
 				allChats.add(new Conversation(rs.getInt("id"),rs.getString("name"),null));

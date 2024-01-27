@@ -33,9 +33,7 @@ public class ModeratorComm {
             }
             statement.close();
             connection.close();
-            System.out.println("B1");
         } catch (Exception e){
-            System.out.println("B2");
             e.printStackTrace();
             return null;
         }
