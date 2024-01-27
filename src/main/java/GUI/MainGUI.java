@@ -2,10 +2,7 @@ package GUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -155,8 +152,20 @@ public class MainGUI extends JFrame implements ActionListener {
 
 		currentConversationName = "";
 
+
+		this.addWindowListener(new WindowAdapter() {//TODO Dodać do głównego okna:Jacob
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// Ta metoda zostanie wywołana po zamknięciu okna
+				System.out.println("Okno zostało zamknięte!");
+				//Dodać informacje użytkownik nie aktywny
+				System.exit(0); // Możesz również użyć frame.dispose() zamiast System.exit(0)
+			}
+		});
+
 		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(new RefreshClock(), 0, 2500); ///TODO czemu to nie działa?????
+		timer.scheduleAtFixedRate(new RefreshClock(), 0, 2500);
+
 
 	}
 	@Override
@@ -173,6 +182,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Panel Mod");
 			ModeratorPanelFrame moderatorPanelFrame = new ModeratorPanelFrame(currentConversationName);
+			moderatorButtonMenu.setEnabled(false);///TODO DOPISĆ:Kamil
 			refreshAllConversationsList();
 			currentConversationName = "";
 		}
