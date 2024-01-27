@@ -51,7 +51,7 @@ class JoinChatGUI extends JFrame implements ActionListener {
 		chatButtonGroup = new ButtonGroup();
 
 		// Dodajmy elementów do listy czatów
-		ArrayList <Conversation> chats  = getAllChats(); ///todo getAllChatsWithoutUser(int userid) ::Kamil/Jacob
+		ArrayList <Conversation> chats  = getAllChatsUser();
 		if(chats != null){
 			for (Conversation chat : chats) {
 				JToggleButton chatButton = new JToggleButton(chat.name);
@@ -145,8 +145,9 @@ class JoinChatGUI extends JFrame implements ActionListener {
 			if(chatInfoTextArea.getText().isEmpty()){
 				JOptionPane.showMessageDialog(null, "Nie wybrano chatu", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
-				System.out.println("Dołączono do czatu - " + chatInfoTextArea.getText());
-				if(!(addUserToChat(chatInfoTextArea.getText()))){
+
+				System.out.println("Dołączono do czatu - " + chatInfoTextArea.getText()); ///todo dodac wywolanie funkcji dolaczania do czatu
+				if(!(DatabaseComm.addUserToChat(chatInfoTextArea.getText()))){
 					JOptionPane.showMessageDialog(null, "Nie Udało się dodać użytkownika", "Błąd", JOptionPane.ERROR_MESSAGE);
 				}
 				refreshAllConversationsList();
