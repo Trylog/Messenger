@@ -44,8 +44,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	private JButton downUserPermissions;
 	private JButton upUserPermissions;
 
-	ArrayList<UsersToggleButton> chatUserButtonList;//TODO DOPISAĆ:Kamil
-	ArrayList<UsersToggleButton> chatModeratorButtonList;//TODO DOPISAĆ:Kamil
+	ArrayList<UsersToggleButton> chatUserButtonList;
+	ArrayList<UsersToggleButton> chatModeratorButtonList;
 
 	private String chatName;
 
@@ -237,7 +237,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			 chatUserListPanel.remove(button);
 			 chatUserButtonGroup.remove(button);
 		 }
-		 for (int i = 0; i< chatUserButtonList.size(); i++) {//TODO Poprawione:Kamil
+		 for (int i = 0; i< chatUserButtonList.size(); i++) {
 			 UsersToggleButton button = chatUserButtonList.get(i);
 			 // Usuń przycisk z listy
 			 button.setVisible(false);
@@ -268,7 +268,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			chatModeratorListPanel.remove(button);
 			chatModeratorButtonGroup.remove(button);
 		}
-		for (int i=0;i<chatModeratorButtonList.size();i++) {//TODO Poprawione:Kamil
+		for (int i=0;i<chatModeratorButtonList.size();i++) {
 				UsersToggleButton button = chatModeratorButtonList.get(i);
 				// Usuń przycisk z listy
 				button.setVisible(false);
@@ -407,11 +407,21 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
 				if(ChatComm.removeUserFromChat(chatName,chatUserInfoTextArea.id)){
+					Enumeration<AbstractButton> buttons = chatUserButtonGroup.getElements();
+					while (buttons.hasMoreElements()) {
+						AbstractButton button = buttons.nextElement();
+						if (button instanceof UsersToggleButton) {
+							UsersToggleButton userButton = (UsersToggleButton) button;
+							if (userButton.id == chatUserInfoTextArea.id) {
+								chatUserButtonGroup.remove(button);
+							}
+						}
+					}
 					System.out.println("Usuniecie użytkownika");
 				}else{
 					JOptionPane.showMessageDialog(null, "Nie udało się usunąć urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 				}
-				refreshChatUserList();//TODO Dopisać:Kamil
+				refreshChatUserList();
 				refreshChatModeratorList();
 			}
 		}
@@ -420,6 +430,16 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Nie wybrano użytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 			}else{
 				if(ModeratorComm.downModeratorPermision(chatName,chatModeratorInfoTextArea.id)){
+					Enumeration<AbstractButton> buttons = chatModeratorButtonGroup.getElements();
+					while (buttons.hasMoreElements()) {
+						AbstractButton button = buttons.nextElement();
+						if (button instanceof UsersToggleButton) {
+							UsersToggleButton userButton = (UsersToggleButton) button;
+							if (userButton.id == chatModeratorInfoTextArea.id) {
+								chatModeratorButtonGroup.remove(button);
+							}
+						}
+					}
 					System.out.println("Obniżenie uprawnień");
 				}else{
 					JOptionPane.showMessageDialog(null, "Nie udało się obniżyć uprawnień.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -438,7 +458,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 					}else{
 						JOptionPane.showMessageDialog(null, "Nie udało się podnieść uprawneń.", "Błąd", JOptionPane.ERROR_MESSAGE);
 					}
-					refreshChatModeratorList();//TODO Poprawić:Kamil
+					refreshChatModeratorList();
 				}else{
 					JOptionPane.showMessageDialog(null, "Taki użytkownik ma już uprrawnieniea moderatora dla tego czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
 				}
@@ -448,11 +468,11 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		if(e.getSource() == editChatDataButton){
 			System.out.println("Edycja danych czatu");
 			ChatDataModyfieGUI chatDataModyfieGUI = new ChatDataModyfieGUI(chatName);
-			refreshChatUserList();//TODO Dopisać::Kamil
+			refreshChatUserList();
 			refreshChatModeratorList();
 		}
 		if(e.getSource() == removeConversationButton){
-			if(ChatComm.removeConversation(chatName)){ ///todo refresh po usunieciu
+			if(ChatComm.removeConversation(chatName)){
 				System.out.println("Konwersacja usunięta");
 			}else{
 				JOptionPane.showMessageDialog(null, "Nie udało się usunąć konwersacji.", "Błąd", JOptionPane.ERROR_MESSAGE);

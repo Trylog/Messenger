@@ -180,7 +180,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			//Wyświetlenie Panelu Moderatora
 			System.out.println("Panel Mod");
 			ModeratorPanelFrame moderatorPanelFrame = new ModeratorPanelFrame(currentConversationName);
-			moderatorButtonMenu.setEnabled(false);///TODO DOPISĆ:Kamil
+			moderatorButtonMenu.setEnabled(false);
 			refreshAllConversationsList();
 			currentConversationName = "";
 		}
