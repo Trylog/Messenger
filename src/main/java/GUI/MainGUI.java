@@ -222,7 +222,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		}
 		mContentPanel.revalidate();
 		mContentPanel.repaint();
-		//System.out.println("odświeżono konwersację");
+		System.out.println("odświeżono konwersację");
 	}
 
 	public static synchronized void addNewMessages() {
