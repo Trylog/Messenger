@@ -11,7 +11,6 @@ import java.util.Timer;
 import Main.*;
 
 import static Main.DatabaseComm.*;
-import static java.lang.Thread.sleep;
 
 public class MainGUI extends JFrame implements ActionListener {
 	public static JScrollPane messagesPanel;
