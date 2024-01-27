@@ -44,6 +44,9 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 	private JButton downUserPermissions;
 	private JButton upUserPermissions;
 
+	ArrayList<UsersToggleButton> chatUserButtonList;//TODO DOPISAĆ:Kamil
+	ArrayList<UsersToggleButton> chatModeratorButtonList;//TODO DOPISAĆ:Kamil
+
 	private String chatName;
 
 	ModeratorPanelFrame(String name){
@@ -97,12 +100,14 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 
 		// Grupa dla przycisków użytkowników czatu
 		chatUserButtonGroup = new ButtonGroup();
+		chatUserButtonList = new ArrayList<UsersToggleButton>();
 
 		// Grupa dla przycisków użytkowników portalu
 		portalUserButtonGroup = new ButtonGroup();
 
 		// Grupa dla przycisków moderatora czatu
 		chatModeratorButtonGroup = new ButtonGroup();
+		chatModeratorButtonList = new ArrayList<UsersToggleButton>();
 
 		refreshChatUserList();
 		refreshChatModeratorList();
@@ -232,6 +237,12 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			 chatUserListPanel.remove(button);
 			 chatUserButtonGroup.remove(button);
 		 }
+		 for (int i = 0; i< chatUserButtonList.size(); i++) {//TODO Poprawione:Kamil
+			 UsersToggleButton button = chatUserButtonList.get(i);
+			 // Usuń przycisk z listy
+			 button.setVisible(false);
+		 }
+		 chatUserButtonList.clear();
 		 chatUserListPanel.revalidate();
 		 chatUserListPanel.repaint();
 		 addChatUsersToList();
@@ -257,6 +268,12 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			chatModeratorListPanel.remove(button);
 			chatModeratorButtonGroup.remove(button);
 		}
+		for (int i=0;i<chatModeratorButtonList.size();i++) {//TODO Poprawione:Kamil
+				UsersToggleButton button = chatModeratorButtonList.get(i);
+				// Usuń przycisk z listy
+				button.setVisible(false);
+		}
+		chatModeratorButtonList.clear();
 		chatModeratorListPanel.revalidate();
 		chatModeratorListPanel.repaint();
 		addChatModeratorsToList();
@@ -274,9 +291,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			chatUserButton.addActionListener(new ChatUserButtonListener());
 			chatUserListPanel.add(chatUserButton);
 			chatUserButtonGroup.add(chatUserButton);
+			chatUserButtonList.add(chatUserButton);
 		}
-		chatUserListPanel.revalidate();
-		chatUserListPanel.repaint();
 	}
 
 	// Dodawanie przycisków użytkowników portalu
@@ -292,25 +308,25 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 			portalUserListPanel.add(portalUserButton);
 			portalUserButtonGroup.add(portalUserButton);
 		}
-		portalUserListPanel.revalidate();
-		portalUserListPanel.repaint();
 	}
 
 	// Dodawanie przycisków moderatorów czatu
-	private void addChatModeratorsToList() { ///todo sprawdzic bug z dublowaniem sie nazw? ::Kamil
+	private void addChatModeratorsToList() {
 		ArrayList<DatabaseComm.User> moderators = ModeratorComm.getChatModeratorsNames(chatName);
-		for (User moderator : moderators) {
-			UsersToggleButton chatModeratorButton = new UsersToggleButton(moderator.id, moderator.username, moderator.icon);
-			chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-			Dimension buttonSize = new Dimension(270, 30);
-			chatModeratorButton.setPreferredSize(buttonSize);
-			chatModeratorButton.setMaximumSize(buttonSize);
-			chatModeratorButton.addActionListener(new ChatModeratorButtonListener());
-			chatModeratorListPanel.add(chatModeratorButton);
-			chatModeratorButtonGroup.add(chatModeratorButton);
+		if(moderators != null){
+			for (User moderator : moderators) {
+				UsersToggleButton chatModeratorButton = new UsersToggleButton(moderator.id, moderator.username, moderator.icon);
+				chatModeratorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+				Dimension buttonSize = new Dimension(270, 30);
+				chatModeratorButton.setPreferredSize(buttonSize);
+				chatModeratorButton.setMaximumSize(buttonSize);
+				chatModeratorButton.addActionListener(new ChatModeratorButtonListener());
+				chatModeratorListPanel.add(chatModeratorButton);
+				chatModeratorButtonGroup.add(chatModeratorButton);
+				chatModeratorButtonList.add(chatModeratorButton);
+			}
+			System.out.println("Brak moderatorów");
 		}
-		chatModeratorListPanel.revalidate();
-		chatModeratorListPanel.repaint();
 	}
 
 	 private void performSearchChatUsers() {
@@ -395,7 +411,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 				}else{
 					JOptionPane.showMessageDialog(null, "Nie udało się usunąć urzytkownika.", "Błąd", JOptionPane.ERROR_MESSAGE);
 				}
-				refreshChatUserList();
+				refreshChatUserList();//TODO Dopisać:Kamil
+				refreshChatModeratorList();
 			}
 		}
 		if(e.getSource() == downUserPermissions){
@@ -421,7 +438,7 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 					}else{
 						JOptionPane.showMessageDialog(null, "Nie udało się podnieść uprawneń.", "Błąd", JOptionPane.ERROR_MESSAGE);
 					}
-					refreshChatUserList();
+					refreshChatModeratorList();//TODO Poprawić:Kamil
 				}else{
 					JOptionPane.showMessageDialog(null, "Taki użytkownik ma już uprrawnieniea moderatora dla tego czatu.", "Błąd", JOptionPane.ERROR_MESSAGE);
 				}
@@ -431,6 +448,8 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		if(e.getSource() == editChatDataButton){
 			System.out.println("Edycja danych czatu");
 			ChatDataModyfieGUI chatDataModyfieGUI = new ChatDataModyfieGUI(chatName);
+			refreshChatUserList();//TODO Dopisać::Kamil
+			refreshChatModeratorList();
 		}
 		if(e.getSource() == removeConversationButton){
 			if(ChatComm.removeConversation(chatName)){ ///todo refresh po usunieciu
