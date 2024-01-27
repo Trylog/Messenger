@@ -31,6 +31,8 @@ public class MainGUI extends JFrame implements ActionListener {
 	public static int respondingId = 0;
 	private static String currentConversationName;
 	public static Image icon;
+
+	public static ArrayList<DatabaseComm.Message> loadedMessages;
 	public static JPanel mContentPanel;
 
 	static JPanel cContentPanel;
@@ -58,7 +60,6 @@ public class MainGUI extends JFrame implements ActionListener {
 		mContentPanel = new JPanel();
 		mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
 		messagesPanel.setViewportView(mContentPanel);
-
 
 		newMessageArea = new JTextArea();
 		newMessageArea.setLineWrap(true);
@@ -153,6 +154,10 @@ public class MainGUI extends JFrame implements ActionListener {
 		currentConversationName = "";
 
 
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new RefreshClock(), 0, 2500);
+
+
 		this.addWindowListener(new WindowAdapter() {//TODO Dodać do głównego okna:Jacob
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -163,9 +168,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			}
 		});
 
-		/*Timer timer = new Timer();
-		timer.scheduleAtFixedRate(new RefreshClock(), 0, 1000); ///TODO czemu to nie działa?????
-		*/
+
 
 	}
 	@Override
@@ -221,16 +224,35 @@ public class MainGUI extends JFrame implements ActionListener {
 		mContentPanel.repaint();
 	}
 
-	public static void refreshShownMessages() {
+	public static synchronized void refreshShownMessages() {
 		removeAllShownMessages();
 		var messages = Main.databaseComm.getMessages(displayedConversationId);
+		loadedMessages = messages;
 
 		for(var message : messages){
 			MessagesListElement element = new MessagesListElement(message);
 			mContentPanel.add(element);
 		}
+		mContentPanel.revalidate();
+		mContentPanel.repaint();
 		System.out.println("odświeżono konwersację");
 	}
+
+	public static synchronized void addNewMessages() {
+		var messages = Main.databaseComm.getMessages(displayedConversationId);
+		if(loadedMessages == null){
+			refreshShownMessages();
+		}else if(messages.size() >= loadedMessages.size()){
+			for (int i = loadedMessages.size(); i<messages.size();i++){
+				loadedMessages.add(messages.get(i));
+				mContentPanel.add(new MessagesListElement(messages.get(i)));
+			}
+		}else refreshShownMessages();
+		mContentPanel.revalidate();
+		mContentPanel.repaint();
+		System.out.println("odświeżono konwersację");
+	}
+
 
 	private static class MessagesListElement extends JPanel{
 
@@ -415,7 +437,7 @@ public class MainGUI extends JFrame implements ActionListener {
 	static class RefreshClock extends TimerTask {
 		@Override
 		public void run() {
-			MainGUI.refreshShownMessages();
+			MainGUI.addNewMessages();
 		}
 	}
 }
