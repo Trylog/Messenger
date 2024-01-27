@@ -16,6 +16,7 @@ public class ModeratorComm {
     private static Statement statement;
     private static String query;
 
+
     //Nie podaje samego siebie
     //ModeratorzyDanegoCzatu
     public static ArrayList<DatabaseComm.User> getChatModeratorsNames(String chatName){
