@@ -5,14 +5,17 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
+import java.util.TimerTask;
+import java.util.Timer;
 
 import Main.*;
 
 import static Main.DatabaseComm.*;
+import static java.lang.Thread.sleep;
 
 public class MainGUI extends JFrame implements ActionListener {
 	public static JScrollPane messagesPanel;
-	public static int displayedConversationId = -1;
+	public static int displayedConversationId = 0;
 	private static JPanel administratorButtonPanel;
 	public static JButton adminButtonMenu;
 	private static JPanel moderatorButtonPanel;
@@ -25,7 +28,7 @@ public class MainGUI extends JFrame implements ActionListener {
 	private static JTextArea newMessageArea;
 
 	public static JScrollPane newMessagePane;
-	public static int respondingId = -1;
+	public static int respondingId = 0;
 	private static String currentConversationName;
 	public static Image icon;
 	public static JPanel mContentPanel;
@@ -56,12 +59,6 @@ public class MainGUI extends JFrame implements ActionListener {
 		mContentPanel.setLayout(new BoxLayout(mContentPanel, BoxLayout.Y_AXIS));
 		messagesPanel.setViewportView(mContentPanel);
 
-		var messages = Main.databaseComm.getMessages();//TODO Brak początkowo wiadomości
-
-		for(var message : messages){
-			MessagesListElement element = new MessagesListElement(message);
-			mContentPanel.add(element);
-		}
 
 		newMessageArea = new JTextArea();
 		newMessageArea.setLineWrap(true);
@@ -155,6 +152,7 @@ public class MainGUI extends JFrame implements ActionListener {
 
 		currentConversationName = "";
 
+
 		this.addWindowListener(new WindowAdapter() {//TODO Dodać do głównego okna:Jacob
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -164,6 +162,10 @@ public class MainGUI extends JFrame implements ActionListener {
 				System.exit(0); // Możesz również użyć frame.dispose() zamiast System.exit(0)
 			}
 		});
+
+		/*Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new RefreshClock(), 0, 1000); ///TODO czemu to nie działa?????
+		*/
 
 	}
 	@Override
@@ -213,6 +215,23 @@ public class MainGUI extends JFrame implements ActionListener {
 		}
 	}
 
+	private static void removeAllShownMessages() {
+		mContentPanel.removeAll();
+		mContentPanel.revalidate();
+		mContentPanel.repaint();
+	}
+
+	public static void refreshShownMessages() {
+		removeAllShownMessages();
+		var messages = Main.databaseComm.getMessages(displayedConversationId);
+
+		for(var message : messages){
+			MessagesListElement element = new MessagesListElement(message);
+			mContentPanel.add(element);
+		}
+		System.out.println("odświeżono konwersację");
+	}
+
 	private static class MessagesListElement extends JPanel{
 
 		private static MessagesListElement currentRedLabel;
@@ -230,9 +249,11 @@ public class MainGUI extends JFrame implements ActionListener {
 			JPanel messagePanel = new JPanel();
 			messagePanel.setLayout(new BorderLayout());
 
-			DatabaseComm.User user = Main.databaseComm.getUser(messageData.senderId); ///todo reakcja na null (jakby sie bugowalo)
+			DatabaseComm.User tempUser = null;
+			while (tempUser == null) tempUser = Main.databaseComm.getUser(messageData.senderId);
+			var user = tempUser;
+
 			JLabel iconLabel = new JLabel(user.icon);
-			this.add(iconLabel);
 
 			JLabel senderName = new JLabel();
 			senderName.setText(user.username);
@@ -254,6 +275,7 @@ public class MainGUI extends JFrame implements ActionListener {
 						if (currentRedLabel != null) {
 							currentRedLabel.content.setBackground(Color.cyan);
 							currentRedLabel.isResponding = false;
+							MainGUI.respondingId = 0;
 						}
 						content.setBackground(Color.pink);
 						currentRedLabel = temp;
@@ -262,7 +284,7 @@ public class MainGUI extends JFrame implements ActionListener {
 						MainGUI.newMessagePane.setBorder(BorderFactory.createTitledBorder("Napisz wiadomość"));
 						isResponding = false;
 						currentRedLabel = null;
-						MainGUI.respondingId = -1;
+						MainGUI.respondingId = 0;
 					}
 				}
 			});
@@ -276,7 +298,7 @@ public class MainGUI extends JFrame implements ActionListener {
 			emoji.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mousePressed(MouseEvent e) {
-					var reactions = Main.databaseComm.getReactionsUsers(messageData.senderId);
+					var reactions = new ReactionsSenders(messageData.id);
 
 				}
 			});
@@ -289,7 +311,6 @@ public class MainGUI extends JFrame implements ActionListener {
 			}
 
 			messagePanel.add(emoji, BorderLayout.SOUTH);
-			this.add(messagePanel);
 
 			JLabel react = new JLabel("\uD83D\uDE42");
 			react.setFont(new Font("Serif", Font.PLAIN, 18));
@@ -301,7 +322,16 @@ public class MainGUI extends JFrame implements ActionListener {
 					EmojiChooser emojiChooser = new EmojiChooser(messageData.id);
 				}
 			});
-			this.add(react);
+
+			if(messageData.senderId == Main.databaseComm.userId){
+				this.add(react);
+				this.add(messagePanel);
+				this.add(iconLabel);
+			}else{
+				this.add(iconLabel);
+				this.add(messagePanel);
+				this.add(react);
+			}
 		}
 	}
 	private static class conversationListPanelElement extends JPanel {
@@ -332,6 +362,9 @@ public class MainGUI extends JFrame implements ActionListener {
 					System.out.println("Kliknięto konwersację: " + name);
 					MainGUI.messagesPanel.setBorder(BorderFactory.createTitledBorder("Czat - " + name));
 					MainGUI.displayedConversationId = conversation.id;
+
+					refreshShownMessages();
+
 					moderatorButtonMenu.setEnabled(getModeratorChatIs(name));
 					currentConversationName = name;
 
@@ -377,6 +410,12 @@ public class MainGUI extends JFrame implements ActionListener {
 
 			// Rysuj obraz na panelu - kwadrat
 			//g.drawImage(obraz, 0, 0, getWidth(), getHeight(), this);
+		}
+	}
+	static class RefreshClock extends TimerTask {
+		@Override
+		public void run() {
+			MainGUI.refreshShownMessages();
 		}
 	}
 }

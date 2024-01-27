@@ -71,6 +71,7 @@ import java.awt.event.ActionListener;
 	public void actionPerformed(ActionEvent e) {
 		System.out.println(((JButton)e.getSource()).getText());
 		Main.databaseComm.sendReaction(msId, ((JButton) e.getSource()).getText());
+		MainGUI.refreshShownMessages();
 		dispose();
 	}
 }
