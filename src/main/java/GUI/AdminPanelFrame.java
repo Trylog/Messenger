@@ -94,11 +94,22 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 		userButtonGroup = new ButtonGroup();
 		portalUserButtonList = new ArrayList<UsersToggleButton>();
 		//Dodawanie Urzytkowników portalu
-		refreshUserList();
+
 		// Grupa dla przycisków czatów
 		chatButtonGroup = new ButtonGroup();
 		// Załadowanie listy czatów
-		refreshChatList();
+
+
+		//Ładowanie paneli
+		try{
+			refreshUserList();
+			refreshChatList();
+
+		}catch (Exception e){
+
+		}
+
+
 
 		// Grupa dla przycisków moderatorów
 		moderatorButtonGroup = new ButtonGroup();

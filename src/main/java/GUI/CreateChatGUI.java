@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import static GUI.MainGUI.refreshAllConversationsList;
 import static Main.DatabaseComm.*;
@@ -163,16 +164,21 @@ class CreateChatGUI extends JFrame implements ActionListener {
 
 		// Dodawanie użytkowników
 		ArrayList <DatabaseComm.User> users = getPortalUsersNames();
-		for (User user : users) {
-			UsersToggleButton portalUserButton = new UsersToggleButton(user.id, user.username, null);
-			portalUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
-			Dimension buttonSize = new Dimension(270, 30);
-			portalUserButton.setPreferredSize(buttonSize);
-			portalUserButton.setMaximumSize(buttonSize);
-			portalUserButton.addActionListener(new PortalUserButtonListener());
-			portalUserListPanel.add(portalUserButton);
-			portalUserButtonGroup.add(portalUserButton);
+		try{
+			for (User user : users) {
+				UsersToggleButton portalUserButton = new UsersToggleButton(user.id, user.username, null);
+				portalUserButton.setAlignmentX(Component.LEFT_ALIGNMENT); // Ustawienie przycisku na lewo
+				Dimension buttonSize = new Dimension(270, 30);
+				portalUserButton.setPreferredSize(buttonSize);
+				portalUserButton.setMaximumSize(buttonSize);
+				portalUserButton.addActionListener(new PortalUserButtonListener());
+				portalUserListPanel.add(portalUserButton);
+				portalUserButtonGroup.add(portalUserButton);
+			}
+		}catch (Exception e){
+
 		}
+
 
 		// Panel z wyszukiwaniem użytkowników czatu
 		JPanel chatUserSearchPanel = new JPanel();
