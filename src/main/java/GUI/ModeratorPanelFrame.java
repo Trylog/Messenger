@@ -109,9 +109,13 @@ class ModeratorPanelFrame extends JFrame implements ActionListener {
 		chatModeratorButtonGroup = new ButtonGroup();
 		chatModeratorButtonList = new ArrayList<UsersToggleButton>();
 
-		refreshChatUserList();
-		refreshChatModeratorList();
-		refreshPortalUserList();
+		try{
+			refreshChatUserList();
+			refreshChatModeratorList();
+			refreshPortalUserList();
+		}catch (Exception e){
+
+		}
 
 		// Panel z wyszukiwaniem użytkowników czatu
 		JPanel chatUserSearchPanel = new JPanel();

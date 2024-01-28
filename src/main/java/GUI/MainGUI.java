@@ -184,7 +184,11 @@ public class MainGUI extends JFrame implements ActionListener {
 			System.out.println("Panel Mod");
 			ModeratorPanelFrame moderatorPanelFrame = new ModeratorPanelFrame(currentConversationName);
 			moderatorButtonMenu.setEnabled(false);///TODO DOPISĆ:Kamil
-			refreshAllConversationsList();
+			try{
+				refreshAllConversationsList();
+			}catch (Exception e1){
+
+			}
 			currentConversationName = "";
 		}
 		if(e.getSource() == createChatButtonMenu){

@@ -462,7 +462,7 @@ public class DatabaseComm {
 		try {
 			connection = DriverManager.getConnection(DBURL,DBUSER,DBPASS);
 			statement = connection.createStatement();
-			query = "select * from conversations where id NOT IN (select conversation_id from conversation_members where user_id = " + userId + ")";
+			query = "select * from conversations where id NOT IN (select conversation_id from conversation_members where user_id = " + userId + ") AND invitation = 1 ";
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()){
 				allChats.add(new Conversation(rs.getInt("id"),rs.getString("name"),null));
