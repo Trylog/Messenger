@@ -156,6 +156,7 @@ public class MainGUI extends JFrame implements ActionListener {
 		this.addWindowListener(new WindowAdapter() {//TODO Dodać do głównego okna:Jacob
 			@Override
 			public void windowClosing(WindowEvent e) {
+				DatabaseComm.makeInactive();
 				// Ta metoda zostanie wywołana po zamknięciu okna
 				System.out.println("Okno zostało zamknięte!");
 				//Dodać informacje użytkownik nie aktywny

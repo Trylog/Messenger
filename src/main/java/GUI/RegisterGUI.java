@@ -127,7 +127,8 @@ public class RegisterGUI extends JFrame implements ActionListener {
 						dispose();
 						LoginGUI loginGUI = new LoginGUI();
 					}else{
-						dispose(); ///todo logowanie, odpalanie w taki sposob buguje program, bo nazwa uzytkownika jest pusta
+						Main.databaseComm.login(login, password);
+						dispose();
 						Main.gui.mainGUI = new MainGUI();
 					}
 				}

@@ -41,6 +41,9 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 	private JButton removeUserFormChatButton;
 	private JButton removeUserFormPortalButton;
 
+	private ArrayList<UsersToggleButton> portalUserButtonList;
+	private ArrayList<UsersToggleButton> chatModeratorButtonList;
+
 	AdminPanelFrame(){
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setResizable(false);
@@ -89,9 +92,9 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 
 		// Grupa dla przycisków użytkowników
 		userButtonGroup = new ButtonGroup();
+		portalUserButtonList = new ArrayList<UsersToggleButton>();
 		//Dodawanie Urzytkowników portalu
 		refreshUserList();
-
 		// Grupa dla przycisków czatów
 		chatButtonGroup = new ButtonGroup();
 		// Załadowanie listy czatów
@@ -99,6 +102,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 
 		// Grupa dla przycisków moderatorów
 		moderatorButtonGroup = new ButtonGroup();
+		chatModeratorButtonList = new ArrayList<UsersToggleButton>();
 		//Lista tworzona dopiero w momencie wybrania
 
 		// Panel z wyszukiwaniem użytkowników
@@ -217,8 +221,14 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			userListPanel.remove(button);
 			userButtonGroup.remove(button);
 		}
-		//userListPanel.revalidate();
-		//userListPanel.repaint();
+		for (int i=0;i<portalUserButtonList.size();i++) {
+			UsersToggleButton button = portalUserButtonList.get(i);
+			// Usuń przycisk z listy
+			button.setVisible(false);
+		}
+		portalUserButtonList.clear();
+		userListPanel.revalidate();
+		userListPanel.repaint();
 		addUserToList();
 	}
 	private void addUserToList(){
@@ -232,6 +242,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			userButton.addActionListener(new AdminPanelFrame.UserButtonListener());
 			userListPanel.add(userButton);
 			userButtonGroup.add(userButton);
+			portalUserButtonList.add(userButton);
 		}
 		userListPanel.revalidate();
 		userListPanel.repaint();
@@ -276,9 +287,16 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			moderatorListPanel.remove(button);
 			moderatorButtonGroup.remove(button);
 		}
-		//moderatorListPanel.revalidate();
-		//moderatorListPanel.repaint();
+		for (int i=0;i<chatModeratorButtonList.size();i++) {
+			UsersToggleButton button = chatModeratorButtonList.get(i);
+			// Usuń przycisk z listy
+			button.setVisible(false);
+		}
+		chatModeratorButtonList.clear();
+		moderatorListPanel.revalidate();
+		moderatorListPanel.repaint();
 		addModeratorToList(chatName);
+
 	}
 	private void addModeratorToList(String chatName) {
 		ArrayList <DatabaseComm.User> moderators = ModeratorComm.getChatModeratorsNames(chatName);
@@ -290,6 +308,7 @@ class AdminPanelFrame extends JFrame implements ActionListener {
 			moderatorButton.setMaximumSize(buttonSize);
 			moderatorButton.addActionListener(new AdminPanelFrame.ModeratorButtonListener());
 			moderatorListPanel.add(moderatorButton);
+			chatModeratorButtonList.add(moderatorButton);
 			moderatorButtonGroup.add(moderatorButton);
 		}
 		moderatorListPanel.revalidate();

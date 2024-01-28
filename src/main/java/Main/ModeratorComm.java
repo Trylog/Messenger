@@ -101,7 +101,7 @@ public class ModeratorComm {
             statement = connection.createStatement();
             query = "call delete_moderator_by_moderator(" + user_id + ",'" + chatName + "');";
             statement.executeQuery(query);
-            query = "call delete_user_from_conversation_by_id(" + user_id + ", '" + chatName + "');";
+            query = "call remove_user_from_conversation_by_id(" + user_id + ", '" + chatName + "');";
             statement.executeQuery(query);
             statement.close();
             connection.close();
